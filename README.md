@@ -1,4 +1,14 @@
-# Getting Started with Create React App
+# F1 Quiz Application
+
+A simple quiz application built with React and Firebase to create and take quizzes related to Formula 1 racing.
+
+## Features
+
+- Create custom quizzes with multiple choice questions
+- Set time limits for quiz completion
+- Take quizzes and get immediate scoring
+- Admin panel for managing quizzes
+- Firebase integration for database storage
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -39,32 +49,38 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Learn More
+## Firebase Setup
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Before running the application, you need to set up Firebase:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. Create a Firebase project at [https://console.firebase.google.com/](https://console.firebase.google.com/)
+2. Enable Firestore database
+3. In the Firebase console, navigate to Project Settings and get your Web SDK configuration
+4. Update the `firebaseConfig` object in `src/firebase.js` with your actual configuration values
 
-### Code Splitting
+## Project Structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- `/src/components/QuizGame.js` - Main quiz-taking component
+- `/src/components/QuizAdmin.js` - Admin interface for creating and managing quizzes
+- `/src/firebase.js` - Firebase configuration and initialization
+- `/src/App.js` - Main application component with routing
 
-### Analyzing the Bundle Size
+## Application Routes
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- `/` - Default route that shows the first available quiz
+- `/quiz/:id` - Route to access a specific quiz by ID
+- `/admin` - Admin interface for creating and managing quizzes
 
-### Making a Progressive Web App
+## Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+This application can be deployed to Firebase Hosting:
 
-### Advanced Configuration
+```bash
+npm install -g firebase-tools
+firebase login
+firebase init
+npm run build
+firebase deploy
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+For more deployment options, see the [Create React App documentation](https://facebook.github.io/create-react-app/docs/deployment).
