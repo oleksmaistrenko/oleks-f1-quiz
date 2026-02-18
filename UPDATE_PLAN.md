@@ -2,7 +2,53 @@
 
 ## Overview
 
-Complete migration from "Oleks F1 Quizz" (CRA) to **welook.ing** — a generic prediction quiz platform built on Vite. Includes full rebrand, public landing page, user dashboard, push + email notifications, Firebase Analytics, and mobile-first design.
+Complete migration from "Oleks F1 Quizz" (CRA) to **welook.ing** — a generic prediction quiz platform built on Vite. Includes full rebrand, public landing page, user dashboard, push + email notifications, Firebase Analytics, i18n translation, and mobile-first design.
+
+---
+
+## Hosting
+
+**Platform:** Firebase Hosting (already configured in `firebase.json` and `.firebaserc`).
+
+**Why Firebase Hosting:**
+- Already integrated — Auth, Firestore, Cloud Functions, and Hosting all in one project
+- Free Spark plan: 10 GB storage, 360 MB/day transfer, automatic SSL
+- SPA rewrites already configured (`** → /index.html`)
+- Single `firebase deploy` deploys hosting + functions together
+- Custom domain (`welook.ing`) setup via Firebase Console → Hosting → Custom domains
+
+**Deployment:**
+```bash
+npm run build                          # Build to /build
+firebase deploy --only hosting         # Deploy frontend
+firebase deploy --only functions       # Deploy Cloud Functions
+firebase deploy                        # Deploy everything
+```
+
+**Optional future upgrades:**
+- **Cloudflare DNS** in front of Firebase Hosting for DDoS protection and caching
+- **GitHub Actions CI/CD** — auto-deploy on merge to `main` (see `.github/workflows/` example below)
+
+```yaml
+# .github/workflows/deploy.yml (optional, for later)
+name: Deploy
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 18 }
+      - run: npm ci && npm run build
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+```
 
 ---
 
@@ -166,7 +212,7 @@ body {
 |------|---------|
 | `src/index.css` | Replace font import, all CSS variables, delete `.racing-pattern` block, update spinner colors |
 | `src/components/Header.jsx` | "Oleks F1 Quizz" → "welook.ing", update color refs |
-| `src/components/Login.jsx` | Remove `racing-pattern` class, "Login to F1 Quiz" → "Login to welook.ing" |
+| `src/components/Login.jsx` | Remove `racing-pattern` class, "Login to F1 Quiz" → "Login to welook.ing", add password reset (see 2.6) |
 | `src/components/QuizGame.jsx` | Remove `racing-pattern`, replace all `var(--f1-*)` |
 | `src/components/QuizAdmin.jsx` | Replace `var(--f1-*)` color refs |
 | `src/components/Rankings.jsx` | Replace F1 colors in table header styles |
@@ -174,7 +220,50 @@ body {
 | `index.html` | Title → "welook.ing - Prediction Quiz Platform" |
 | `public/manifest.json` | Update name, short_name, theme_color |
 
-### 2.5 Verify
+### 2.6 Password Reset
+
+**Add to `src/firebase.js`:**
+```javascript
+import { sendPasswordResetEmail } from "firebase/auth";
+
+export const resetPassword = (email) => {
+  return sendPasswordResetEmail(auth, email);
+};
+```
+
+**Update `src/components/Login.jsx`:**
+
+Add a `forgotPassword` state and a third form view:
+
+```jsx
+const [mode, setMode] = useState("login"); // "login" | "register" | "forgot"
+const [resetSent, setResetSent] = useState(false);
+
+const handleForgotPassword = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
+  try {
+    await resetPassword(email);
+    setResetSent(true);
+  } catch (error) {
+    setError(
+      error.code === "auth/user-not-found"
+        ? "No account found with this email"
+        : "Failed to send reset email"
+    );
+  }
+  setLoading(false);
+};
+```
+
+UI changes:
+- Add "Forgot password?" link below the password field (visible in login mode)
+- Clicking it switches to forgot mode — shows only email field + "Send Reset Link" button
+- On success: show confirmation message "Check your email for a reset link"
+- "Back to login" link to return
+
+### 2.7 Verify
 
 ```bash
 grep -ri "f1\|formula\|race\|racing\|titillium\|checkered" src/
@@ -685,9 +774,498 @@ Replace `flex space-x-4` with `.options-grid`:
 
 ---
 
+## Phase 8: Internationalization (i18n)
+
+### 8.1 Install Dependencies
+
+```bash
+npm install i18next react-i18next i18next-browser-languagedetector
+```
+
+### 8.2 Create Translation Files
+
+**Create `src/i18n/` directory with locale files:**
+
+`src/i18n/en.json`:
+```json
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "play": "Play",
+    "rankings": "Rankings",
+    "rules": "Rules",
+    "login": "Login",
+    "logout": "Logout",
+    "admin": "Admin",
+    "users": "Users"
+  },
+  "landing": {
+    "headline": "Predict. Compete. Prove You Called It.",
+    "subheading": "Make predictions on real-world outcomes and compete with friends.",
+    "getStarted": "Get Started",
+    "howItWorks": "How It Works",
+    "step1Title": "Predict",
+    "step1Desc": "Answer yes/no questions about upcoming events.",
+    "step2Title": "Wait",
+    "step2Desc": "Results are revealed when the event concludes.",
+    "step3Title": "Score",
+    "step3Desc": "See how you stack up on the leaderboard.",
+    "cta": "Start Predicting Today"
+  },
+  "login": {
+    "title": "Login to welook.ing",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Login",
+    "registerButton": "Register",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "quizzesPlayed": "Quizzes Played",
+    "totalPoints": "Total Points",
+    "accuracy": "Accuracy",
+    "quizHistory": "Quiz History",
+    "quizTitle": "Quiz Title",
+    "score": "Score",
+    "date": "Date",
+    "status": "Status",
+    "statusScored": "Scored",
+    "statusOpen": "Open",
+    "notifications": "Notification Preferences",
+    "pushNotifications": "Push Notifications",
+    "emailNotifications": "Email Notifications"
+  },
+  "quiz": {
+    "deadline": "Deadline",
+    "submit": "Submit Answers",
+    "submitted": "Answers Submitted",
+    "yes": "Yes",
+    "no": "No",
+    "resultsAvailable": "Results Available",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "pending": "Pending"
+  },
+  "rankings": {
+    "title": "Rankings",
+    "rank": "Rank",
+    "player": "Player",
+    "score": "Score"
+  },
+  "rules": {
+    "title": "Rules",
+    "content": "..."
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back"
+  }
+}
+```
+
+Additional locale files (same structure, translated values):
+- `src/i18n/es.json` — Spanish
+- `src/i18n/de.json` — German
+- `src/i18n/fr.json` — French
+- `src/i18n/pt.json` — Portuguese
+
+Start with the top 4-5 languages by global internet users. Add more locales as demand grows.
+
+### 8.3 Initialize i18n
+
+**Create `src/i18n/index.js`:**
+```javascript
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+import LanguageDetector from 'i18next-browser-languagedetector';
+import en from './en.json';
+import es from './es.json';
+import de from './de.json';
+import fr from './fr.json';
+import pt from './pt.json';
+
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources: {
+      en: { translation: en },
+      es: { translation: es },
+      de: { translation: de },
+      fr: { translation: fr },
+      pt: { translation: pt },
+    },
+    fallbackLng: 'en',
+    interpolation: { escapeValue: false },
+    detection: {
+      order: ['localStorage', 'navigator'],
+      caches: ['localStorage'],
+    },
+  });
+
+export default i18n;
+```
+
+**Import in `src/main.jsx`:**
+```javascript
+import './i18n';
+```
+
+### 8.4 Language Switcher Component
+
+**Create `src/components/LanguageSwitcher.jsx`:**
+```jsx
+import { useTranslation } from 'react-i18next';
+
+const languages = [
+  { code: 'en', label: 'EN' },
+  { code: 'es', label: 'ES' },
+  { code: 'de', label: 'DE' },
+  { code: 'fr', label: 'FR' },
+  { code: 'pt', label: 'PT' },
+];
+
+const LanguageSwitcher = () => {
+  const { i18n } = useTranslation();
+
+  return (
+    <div className="language-switcher">
+      {languages.map((lang) => (
+        <button
+          key={lang.code}
+          className={i18n.language === lang.code ? 'active' : ''}
+          onClick={() => i18n.changeLanguage(lang.code)}
+        >
+          {lang.label}
+        </button>
+      ))}
+    </div>
+  );
+};
+
+export default LanguageSwitcher;
+```
+
+Render in `Header.jsx` (visible to both authenticated and unauthenticated users).
+
+### 8.5 Replace Hardcoded Strings in Components
+
+Use the `useTranslation` hook in each component:
+```jsx
+import { useTranslation } from 'react-i18next';
+
+const MyComponent = () => {
+  const { t } = useTranslation();
+  return <h1>{t('dashboard.title')}</h1>;
+};
+```
+
+**Components to update:**
+| Component | Keys to use |
+|-----------|-------------|
+| `Header.jsx` | `nav.*` |
+| `LandingPage.jsx` | `landing.*` |
+| `Login.jsx` | `login.*` |
+| `Dashboard.jsx` | `dashboard.*` |
+| `QuizGame.jsx` | `quiz.*` |
+| `Rankings.jsx` | `rankings.*` |
+| `Rules.jsx` | `rules.*` |
+| `NotificationPrompt.jsx` | `dashboard.notifications` |
+
+### 8.6 Quiz Content Auto-Translation
+
+Quiz questions and answers live in Firestore and are created by admins in English. Auto-translate on the fly using the Cloud Translation API.
+
+**Add Cloud Function for translation caching:**
+
+`functions/translate.js`:
+```javascript
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { getFirestore } = require("firebase-admin/firestore");
+const { TranslationServiceClient } = require("@google-cloud/translate");
+
+const translationClient = new TranslationServiceClient();
+const TARGET_LANGS = ["es", "de", "fr", "pt"];
+
+exports.onQuizCreatedTranslate = onDocumentCreated("quizzes/{quizId}", async (event) => {
+  const db = getFirestore();
+  const quizData = event.data.data();
+  const quizId = event.params.quizId;
+  const projectId = process.env.GCLOUD_PROJECT;
+
+  const textsToTranslate = [
+    quizData.title,
+    ...quizData.questions.map((q) => q.text),
+  ];
+
+  const translations = {};
+
+  for (const lang of TARGET_LANGS) {
+    const [response] = await translationClient.translateText({
+      parent: `projects/${projectId}/locations/global`,
+      contents: textsToTranslate,
+      mimeType: "text/plain",
+      sourceLanguageCode: "en",
+      targetLanguageCode: lang,
+    });
+
+    const translated = response.translations.map((t) => t.translatedText);
+    translations[lang] = {
+      title: translated[0],
+      questions: translated.slice(1),
+    };
+  }
+
+  // Store translations as a subcollection
+  await db.doc(`quizzes/${quizId}/translations/auto`).set(translations);
+});
+```
+
+**Client-side usage in `QuizGame.jsx`:**
+```javascript
+const { i18n } = useTranslation();
+const lang = i18n.language;
+
+// Fetch translations doc if lang !== 'en'
+// Fall back to original English text if translation unavailable
+```
+
+**Firestore structure:**
+```
+quizzes/{quizId}/translations/auto: {
+  es: { title: "...", questions: ["...", "...", "..."] },
+  de: { title: "...", questions: ["...", "...", "..."] },
+  fr: { title: "...", questions: ["...", "...", "..."] },
+  pt: { title: "...", questions: ["...", "...", "..."] },
+}
+```
+
+**Prerequisites:**
+- Enable Cloud Translation API in Google Cloud Console
+- Add `@google-cloud/translate` to `functions/package.json`
+- The API is free for first 500,000 characters/month
+
+### 8.7 Language Switcher CSS
+
+```css
+.language-switcher {
+  display: flex;
+  gap: 4px;
+}
+
+.language-switcher button {
+  background: transparent;
+  border: 1px solid var(--wl-gray-200);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--wl-gray-500);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.language-switcher button.active {
+  background: var(--wl-primary);
+  border-color: var(--wl-primary);
+  color: var(--wl-white);
+}
+```
+
+### 8.8 Verify
+
+- Switch to Spanish/German/French/Portuguese → all UI labels change
+- Refresh page → language persists (localStorage)
+- New visitor → language auto-detected from browser
+- Quiz questions and titles auto-translated when viewing in non-English language
+- Falls back to English gracefully if translation not yet available
+- Landing page, login, dashboard, quiz, rankings, rules — all translated
+
+---
+
+## Phase 9: Additional Features
+
+### 9.1 PWA Install Prompt
+
+The app already has `manifest.json` and a service worker setup. Add a custom install prompt.
+
+**Create `src/components/InstallPrompt.jsx`:**
+```jsx
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+
+const InstallPrompt = () => {
+  const { t } = useTranslation();
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showPrompt, setShowPrompt] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowPrompt(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    setDeferredPrompt(null);
+    setShowPrompt(false);
+  };
+
+  if (!showPrompt) return null;
+
+  return (
+    <div className="install-banner">
+      <span>Install welook.ing for a better experience</span>
+      <button onClick={handleInstall}>Install</button>
+      <button onClick={() => setShowPrompt(false)}>Dismiss</button>
+    </div>
+  );
+};
+
+export default InstallPrompt;
+```
+
+Render in `App.jsx` (above routes).
+
+### 9.2 Social Sharing
+
+**Create `src/components/ShareButton.jsx`:**
+```jsx
+const ShareButton = ({ quizTitle, score, total }) => {
+  const text = `I scored ${score}/${total} on "${quizTitle}" at welook.ing! Can you beat me?`;
+  const url = 'https://welook.ing';
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({ title: 'welook.ing', text, url });
+    } else {
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      alert('Copied to clipboard!');
+    }
+  };
+
+  return (
+    <button className="share-button" onClick={handleShare}>
+      Share Result
+    </button>
+  );
+};
+
+export default ShareButton;
+```
+
+Render in `QuizGame.jsx` after results are shown, and optionally in `Dashboard.jsx` per quiz row.
+
+### 9.3 Dark Mode
+
+**Extend CSS variables in `src/index.css`:**
+```css
+:root {
+  /* ... existing light theme variables ... */
+  --wl-bg: #FFFFFF;
+  --wl-bg-secondary: var(--wl-gray-50);
+  --wl-text: var(--wl-gray-900);
+  --wl-text-secondary: var(--wl-gray-600);
+  --wl-card-bg: var(--wl-white);
+  --wl-card-shadow: rgba(0, 0, 0, 0.08);
+  --wl-border: var(--wl-gray-200);
+}
+
+[data-theme="dark"] {
+  --wl-bg: #0F172A;
+  --wl-bg-secondary: #1E293B;
+  --wl-text: #F1F5F9;
+  --wl-text-secondary: #94A3B8;
+  --wl-card-bg: #1E293B;
+  --wl-card-shadow: rgba(0, 0, 0, 0.3);
+  --wl-border: #334155;
+  --wl-primary-light: #312E81;
+  --wl-gray-50: #1E293B;
+  --wl-gray-100: #334155;
+}
+
+body {
+  background-color: var(--wl-bg);
+  color: var(--wl-text);
+}
+```
+
+**Create `src/components/ThemeToggle.jsx`:**
+```jsx
+import { useState, useEffect } from 'react';
+
+const ThemeToggle = () => {
+  const [dark, setDark] = useState(
+    () => localStorage.getItem('theme') === 'dark'
+  );
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }, [dark]);
+
+  return (
+    <button className="theme-toggle" onClick={() => setDark(!dark)}>
+      {dark ? '☀️' : '🌙'}
+    </button>
+  );
+};
+
+export default ThemeToggle;
+```
+
+Render in `Header.jsx` next to `LanguageSwitcher`.
+
+Update all components to use semantic variables (`var(--wl-bg)`, `var(--wl-card-bg)`, `var(--wl-text)`) instead of hardcoded colors.
+
+### 9.4 Quiz Categories/Tags (Future)
+
+Add optional `category` field to quiz documents in Firestore:
+```
+quizzes/{id}: { ..., category: "sports" | "politics" | "entertainment" | "general" }
+```
+
+- Filter dropdown on the quiz list page
+- Category badges on quiz cards
+- Dashboard stats broken down by category
+
+*Lower priority — implement when quiz volume justifies filtering.*
+
+### 9.5 Achievement Badges (Future)
+
+Firestore `users/{id}/achievements` subcollection:
+```
+{ type: "first_quiz" | "perfect_score" | "streak_5" | "streak_10", earnedAt: timestamp }
+```
+
+Cloud Function triggers on quiz scoring to check and award badges. Display on Dashboard and profile.
+
+*Lower priority — implement for gamification after core features are stable.*
+
+### 9.6 Verify
+
+- PWA: "Install" banner appears on mobile Chrome, app installs to home screen
+- Sharing: "Share Result" opens native share sheet (mobile) or copies to clipboard (desktop)
+- Dark mode: toggle works, persists across sessions, all pages render correctly
+- No hardcoded white/dark backgrounds that break in the opposite theme
+
+---
+
 ## Files Summary
 
-### Create (11 new files)
+### Create (22 new files)
 
 | File | Phase | Purpose |
 |------|-------|---------|
@@ -702,23 +1280,34 @@ Replace `flex space-x-4` with `.options-grid`:
 | `public/firebase-messaging-sw.js` | 5 | FCM service worker |
 | `functions/package.json` | 5 | Cloud Functions dependencies |
 | `functions/index.js` | 5 | Cloud Function: onQuizCreated |
+| `functions/translate.js` | 8 | Cloud Function: auto-translate quiz content |
+| `src/i18n/index.js` | 8 | i18n initialization and config |
+| `src/i18n/en.json` | 8 | English translation strings |
+| `src/i18n/es.json` | 8 | Spanish translation strings |
+| `src/i18n/de.json` | 8 | German translation strings |
+| `src/i18n/fr.json` | 8 | French translation strings |
+| `src/i18n/pt.json` | 8 | Portuguese translation strings |
+| `src/components/LanguageSwitcher.jsx` | 8 | Language selector component |
+| `src/components/InstallPrompt.jsx` | 9 | PWA install banner |
+| `src/components/ShareButton.jsx` | 9 | Social sharing for quiz results |
+| `src/components/ThemeToggle.jsx` | 9 | Dark/light mode toggle |
 
 ### Modify (15 files)
 
 | File | Phases | Changes |
 |------|--------|---------|
-| `package.json` | 1 | Remove CRA, add Vite deps, `"type": "module"` |
+| `package.json` | 1, 8 | Remove CRA, add Vite deps, `"type": "module"`, add i18n deps |
 | `.env` / `.env.example` | 1, 5 | Rename vars, add measurement ID + VAPID key |
 | `src/firebase.js` | 1, 5, 6 | Vite env vars, Analytics, FCM, notification helpers |
-| `src/main.jsx` | 1, 6 | Entry point (renamed), BrowserRouter moved here |
-| `src/App.jsx` | 3, 4, 6 | New routes, page tracking, import HomeRoute/Dashboard |
-| `src/index.css` | 2, 3, 4, 7 | Full rebrand, landing styles, dashboard styles, mobile-first |
-| `src/components/Header.jsx` | 2, 3, 4, 7 | Rebrand, conditional nav, dashboard link, hamburger |
-| `src/components/Login.jsx` | 2, 6 | Remove racing-pattern, rebrand text, analytics |
-| `src/components/QuizGame.jsx` | 2, 6, 7 | Rebrand colors, analytics, mobile options |
+| `src/main.jsx` | 1, 6, 8 | Entry point (renamed), BrowserRouter moved here, import i18n |
+| `src/App.jsx` | 3, 4, 6, 9 | New routes, page tracking, InstallPrompt |
+| `src/index.css` | 2, 3, 4, 7, 8, 9 | Full rebrand, landing styles, dashboard styles, mobile-first, language switcher, dark mode |
+| `src/components/Header.jsx` | 2, 3, 4, 7, 8, 9 | Rebrand, conditional nav, hamburger, LanguageSwitcher, ThemeToggle |
+| `src/components/Login.jsx` | 2, 6, 8 | Remove racing-pattern, rebrand text, analytics, i18n |
+| `src/components/QuizGame.jsx` | 2, 6, 7, 8, 9 | Rebrand colors, analytics, mobile options, i18n, ShareButton |
 | `src/components/QuizAdmin.jsx` | 2 | Replace F1 color refs |
-| `src/components/Rankings.jsx` | 2, 7 | Replace F1 colors, mobile card view |
-| `src/components/Rules.jsx` | 2 | Full text rewrite (generic prediction language) |
+| `src/components/Rankings.jsx` | 2, 7, 8 | Replace F1 colors, mobile card view, i18n |
+| `src/components/Rules.jsx` | 2, 8 | Full text rewrite, i18n |
 | `src/components/UsersList.jsx` | 7 | Mobile card view |
 | `firebase.json` | 5 | Add functions config |
 | `public/manifest.json` | 2 | Update name, theme_color |
@@ -743,6 +1332,10 @@ Before Phase 5, set up in Firebase Console:
 4. **SendGrid account** — free tier (100 emails/day), get API key
 5. **Domain** — configure `welook.ing` in Firebase Hosting custom domains
 
+Before Phase 8:
+6. **Enable Cloud Translation API** in Google Cloud Console (free for first 500K chars/month)
+7. Add `@google-cloud/translate` to `functions/package.json`
+
 ---
 
 ## Execution Order
@@ -760,7 +1353,11 @@ Phase 4 (Dashboard)
   ↓
 Phase 5 (Notifications)
   ↓
-Phase 7 (Mobile-First CSS) — best done last, touches CSS across all components
+Phase 7 (Mobile-First CSS)
+  ↓
+Phase 8 (i18n) — after UI is stable, extract all strings
+  ↓
+Phase 9 (PWA Install, Sharing, Dark Mode) — polish layer
 ```
 
 ### Branch Strategy
@@ -784,6 +1381,7 @@ git checkout -b feature/phase2-rebrand
 ### Final Integration
 - [ ] Logged out: landing page renders at `/`
 - [ ] Login/Register works
+- [ ] "Forgot password?" sends reset email, link works
 - [ ] Logged in: redirected to `/dashboard`
 - [ ] Dashboard shows correct stats + quiz history
 - [ ] Play quiz: loads, submits, shows results
@@ -794,5 +1392,12 @@ git checkout -b feature/phase2-rebrand
 - [ ] Analytics events visible in Network tab
 - [ ] Mobile (375px): hamburger works, cards instead of tables, options stack
 - [ ] No F1/racing references anywhere in UI
+- [ ] Language switcher: switch to Spanish/German/etc. → all UI labels change
+- [ ] Quiz content auto-translates when language is changed
+- [ ] Language persists across page refresh (localStorage)
+- [ ] Dark mode toggle works, all pages render correctly in both themes
+- [ ] Dark mode preference persists across sessions
+- [ ] PWA install banner appears on mobile Chrome
+- [ ] Share button opens native share (mobile) or copies to clipboard (desktop)
 - [ ] `firebase deploy --only hosting` works
 - [ ] `firebase deploy --only functions` works

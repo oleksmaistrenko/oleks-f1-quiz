@@ -2588,9 +2588,170 @@ git commit -m "feat: add social sharing for quiz results"
 
 ---
 
-## Task 19: Final Testing & Deployment
+## Task 19: Quiz Content Auto-Translation (Cloud Translation API)
 
-> This was previously Task 16. Renumbered due to added tasks.
+**Depends on:** Task 9 (i18n), Task 10 (Cloud Functions)
+
+**Files:**
+- Create: `functions/translate.js`
+- Modify: `functions/index.js` — export translate function
+- Modify: `functions/package.json` — add `@google-cloud/translate`
+- Modify: `src/components/quiz/QuizGame.jsx` — fetch translated quiz content
+- Modify: `src/firebase.js` — add `getTranslatedQuiz` helper
+
+**Prerequisites:**
+- Enable Cloud Translation API in Google Cloud Console (free for first 500,000 characters/month)
+- Add `@google-cloud/translate` to `functions/package.json`
+
+**Step 1: Install Cloud Translation dependency**
+
+```bash
+cd functions
+npm install @google-cloud/translate
+cd ..
+```
+
+**Step 2: Create `functions/translate.js`**
+
+Cloud Function triggered on quiz creation/update that auto-translates quiz title and questions into all supported languages and caches the result in a Firestore subcollection.
+
+```javascript
+const { onDocumentWritten } = require('firebase-functions/v2/firestore');
+const { getFirestore } = require('firebase-admin/firestore');
+const { Translate } = require('@google-cloud/translate').v2;
+
+const translate = new Translate();
+const db = getFirestore();
+
+const TARGET_LANGUAGES = ['fr', 'es', 'it', 'pt', 'uk'];
+
+exports.translateQuiz = onDocumentWritten('quizzes/{quizId}', async (event) => {
+  const after = event.data?.after?.data();
+  if (!after) return; // Quiz was deleted
+
+  const quizId = event.params.quizId;
+  const title = after.title || '';
+  const questions = (after.questions || []).map((q) => q.question || q.text || '');
+
+  // Combine all text to translate in one batch
+  const textsToTranslate = [title, ...questions];
+
+  const translations = {};
+
+  for (const lang of TARGET_LANGUAGES) {
+    try {
+      const [results] = await translate.translate(textsToTranslate, lang);
+      translations[lang] = {
+        title: results[0],
+        questions: results.slice(1),
+      };
+    } catch (error) {
+      console.error(`Translation to ${lang} failed:`, error);
+      // Skip this language, don't block others
+    }
+  }
+
+  // Store translations as a subcollection document
+  await db.doc(`quizzes/${quizId}/translations/auto`).set(translations);
+});
+```
+
+**Step 3: Export the function in `functions/index.js`**
+
+Add to `functions/index.js`:
+
+```javascript
+const { translateQuiz } = require('./translate');
+exports.translateQuiz = translateQuiz;
+```
+
+**Step 4: Add `getTranslatedQuiz` helper in `src/firebase.js`**
+
+```javascript
+import { doc, getDoc } from 'firebase/firestore';
+
+export const getTranslatedQuiz = async (quizId, language) => {
+  if (!language || language === 'en') return null; // No translation needed
+
+  try {
+    const translationDoc = await getDoc(
+      doc(db, 'quizzes', quizId, 'translations', 'auto')
+    );
+
+    if (!translationDoc.exists()) return null;
+
+    const data = translationDoc.data();
+    return data[language] || null;
+  } catch (error) {
+    console.error('Error fetching quiz translation:', error);
+    return null; // Fall back to English gracefully
+  }
+};
+```
+
+**Step 5: Update `QuizGame.jsx` to use translated content**
+
+In `QuizGame.jsx`, after loading quiz data, check the user's current language and fetch the translation:
+
+```jsx
+import { useTranslation } from 'react-i18next';
+import { getTranslatedQuiz } from '../../firebase';
+
+// Inside component:
+const { i18n } = useTranslation();
+const [translatedContent, setTranslatedContent] = useState(null);
+
+// After quiz data is loaded:
+useEffect(() => {
+  const fetchTranslation = async () => {
+    if (quiz?.id && i18n.language !== 'en') {
+      const translation = await getTranslatedQuiz(quiz.id, i18n.language);
+      setTranslatedContent(translation);
+    } else {
+      setTranslatedContent(null);
+    }
+  };
+  fetchTranslation();
+}, [quiz?.id, i18n.language]);
+
+// When rendering quiz title:
+// translatedContent?.title || quiz.title
+
+// When rendering question text:
+// translatedContent?.questions?.[index] || question.text
+```
+
+**Step 6: Firestore structure**
+
+```
+quizzes/{quizId}/translations/auto: {
+  fr: { title: "...", questions: ["...", "...", "..."] },
+  es: { title: "...", questions: ["...", "...", "..."] },
+  it: { title: "...", questions: ["...", "...", "..."] },
+  pt: { title: "...", questions: ["...", "...", "..."] },
+  uk: { title: "...", questions: ["...", "...", "..."] },
+}
+```
+
+**Step 7: Verify**
+
+- Create a quiz (in English) → Cloud Function triggers → check Firestore for `quizzes/{id}/translations/auto` document
+- Switch language to French → quiz title and questions display in French
+- Switch back to English → original English text shows
+- If translation is unavailable → falls back to English gracefully
+
+**Step 8: Commit**
+
+```bash
+git add -A
+git commit -m "feat: add Cloud Translation API for auto-translating quiz content"
+```
+
+---
+
+## Task 20: Final Testing & Deployment
+
+> This was previously Task 19. Renumbered due to added task.
 
 **Files:**
 - Modify: `public/manifest.json` — update app name
@@ -2661,6 +2822,8 @@ Navigate through all pages, test all flows.
 - [ ] OG meta tags present in page source
 - [ ] PWA install banner appears on mobile Chrome
 - [ ] Share button works after quiz scoring (native share or clipboard)
+- [ ] Quiz content auto-translates when language is changed (title + questions)
+- [ ] Falls back to English if translation not yet available
 - [ ] `firebase deploy --only hosting` works
 - [ ] `firebase deploy --only functions` works
 
@@ -2706,5 +2869,6 @@ git commit -m "feat: finalize we-check.ing for public launch"
 | 16 | Firebase Analytics | 5 |
 | 17 | PWA Install Prompt | 4 |
 | 18 | Social Sharing | 4 |
-| 19 | Testing & deployment | 7 |
-| **Total** | | **118 steps** |
+| 19 | Quiz Content Auto-Translation (Cloud Translation API) | 8 |
+| 20 | Testing & deployment | 7 |
+| **Total** | | **126 steps** |

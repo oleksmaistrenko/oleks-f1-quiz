@@ -1,4 +1,4 @@
-# wecheck.ing - Product Summary
+# welook.ing - Product Summary
 
 ## What It Is
 
@@ -62,7 +62,7 @@ A prediction quiz platform where users answer Yes/No questions about upcoming ev
 - Open source (MIT License)
 
 ### Professional Presence
-**Custom Domain: wecheck.ing**
+**Custom Domain: welook.ing**
 - Memorable URL using F1 meme reference
 - .ing TLD with mandatory HTTPS security
 - Builds community recognition
@@ -95,19 +95,19 @@ A prediction quiz platform where users answer Yes/No questions about upcoming ev
 
 ---
 
-## Brand: wecheck.ing
+## Brand: welook.ing
 
-**Tagline:** "We are checking... your predictions"
+**Tagline:** "We are looking... at your predictions"
 
 ### The Name Story
-Inspired by the iconic Ferrari F1 team radio meme "We are checking" - a phrase that became legendary for its association with dramatic strategy moments in Formula 1. The name captures:
+Inspired by the iconic F1 team radio meme "We are checking" — the name riffs on that phrase with "we look.ing" to capture:
 
-- The anticipation of checking race results
+- The anticipation of looking at results
 - F1 community inside humor
-- The fun of verifying who predicted correctly
+- The fun of seeing who predicted correctly
 
 ### Domain
-- **URL:** https://wecheck.ing
+- **URL:** https://welook.ing
 - **TLD:** .ing (Google Registry, requires HTTPS)
 - **Cost:** ~$12/year
 
@@ -146,8 +146,8 @@ This app is unofficial and not affiliated with Formula 1, FIA, or any F1 team. F
 
 ## Next Steps
 
-1. ~~Choose a name~~ ✅ **wecheck.ing**
-2. Register domain at wecheck.ing
+1. ~~Choose a name~~ ✅ **welook.ing**
+2. Register domain at welook.ing
 3. Build planned features
 4. Add legal disclaimer to footer
 5. Invite first users
