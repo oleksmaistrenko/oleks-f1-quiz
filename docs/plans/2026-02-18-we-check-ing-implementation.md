@@ -22,14 +22,36 @@
 - Modify: `.env.example` (env var prefix)
 - Modify: `firebase.json` (build dir → dist)
 
-**Step 1: Install Vite and remove CRA**
+**Step 1: Install Vite and remove CRA dependencies**
 
 ```bash
-npm uninstall react-scripts
+npm uninstall react-scripts web-vitals @testing-library/dom @testing-library/jest-dom @testing-library/react @testing-library/user-event
 npm install --save-dev vite @vitejs/plugin-react
 ```
 
-**Step 2: Create `vite.config.js`**
+**Step 2: Create Vite and Tailwind config files**
+
+Create `postcss.config.js`:
+
+```js
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+```
+
+Create `tailwind.config.js`:
+
+```js
+export default {
+  content: ["./index.html", "./src/**/*.{js,jsx}"],
+  theme: { extend: {} },
+};
+```
+
+**Step 3: Create `vite.config.js`**
 
 ```js
 import { defineConfig } from 'vite';
@@ -43,6 +65,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    sourcemap: true,
   },
 });
 ```
@@ -122,6 +145,7 @@ Also copy `.env` (the real file) and update its prefixes from `REACT_APP_` to `V
 
 ```json
 {
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -148,7 +172,7 @@ Change build directory from `build` to `dist`:
 
 **Step 8: Delete CRA-specific files**
 
-Delete: `src/reportWebVitals.js` (if at root level), `src/components/reportWebVitals.js`, `src/components/setupTests.js`
+Delete: `src/reportWebVitals.js` (if at root level), `src/components/reportWebVitals.js`, `src/components/setupTests.js`, `src/App.test.js` (if exists), `public/index.html` (after moving to root)
 
 **Step 9: Verify dev server starts**
 
@@ -896,6 +920,20 @@ function App() {
 }
 
 export default App;
+```
+
+**Step 4a: Add SEO meta tags to `index.html`**
+
+Add inside `<head>`:
+
+```html
+<meta property="og:title" content="we-check.ing — F1 Prediction Quiz" />
+<meta property="og:description" content="Think you can predict F1 results better than Ferrari's strategy team? Prove it." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://we-check.ing" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="we-check.ing — F1 Prediction Quiz" />
+<meta name="twitter:description" content="We are checking your predictions..." />
 ```
 
 Note: `useAuth` cannot be inside `<Router>` and also outside it. Since Layout needs Router context (for Links), we need to restructure slightly — put `useAuth` inside a child component of Router, or use the auth state in App differently. The simplest approach: keep `useAuth` in App but ensure Router wraps everything. This works because `useAuth` doesn't depend on Router.
@@ -1768,7 +1806,15 @@ exports.onScoresUpdated = onDocumentUpdated('quizAnswers/{answerId}', async (eve
 cd functions && npm install && cd ..
 ```
 
-**Step 5: Commit**
+**Step 5: Update `.gitignore`**
+
+Add to `.gitignore`:
+
+```
+functions/node_modules
+```
+
+**Step 6: Commit**
 
 ```bash
 git add -A
@@ -2196,27 +2242,101 @@ git commit -m "feat: add 404 page and meme-style copy throughout"
 
 **Files:**
 - Modify: `src/styles/index.css` — responsive refinements
+- Modify: `src/components/layout/Header.jsx` — hamburger menu
+- Modify: `src/components/pages/Rankings.jsx` — mobile card view
+- Modify: `src/components/admin/UsersList.jsx` — mobile card view
 
-**Step 1: Audit and fix mobile layout issues**
+**Step 1: Convert media queries to mobile-first**
 
-Review all pages at 375px width (iPhone SE). Fix:
-- Header: hamburger menu or simplified nav for mobile
-- Dashboard: stats grid stacks to 2 columns, then 1 on very small screens
-- Rankings: horizontal scroll on table (already exists, verify)
-- Landing: hero text scales down properly
-- Footer: language switcher wraps properly
-- Quiz cards: full width on mobile
-- Buttons: full width on mobile where appropriate
+Replace `max-width` (desktop-first) with `min-width` (mobile-first) in `src/styles/index.css`:
 
-**Step 2: Add mobile nav toggle to Header**
+```css
+/* Mobile base (default) */
+.header-content {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
 
-Add a hamburger menu button and collapsible nav for screens < 768px.
+/* Tablet+ */
+@media (min-width: 768px) {
+  .header-content {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+```
 
-**Step 3: Test on multiple screen sizes**
+**Step 2: Add hamburger menu to Header**
+
+Add `menuOpen` state + hamburger button (hidden on desktop via CSS):
+
+```css
+.hamburger { display: flex; }
+.nav-menu { display: none; }
+.nav-menu.open { display: flex; flex-direction: column; }
+
+@media (min-width: 768px) {
+  .hamburger { display: none; }
+  .nav-menu { display: flex; flex-direction: row; }
+}
+```
+
+Close menu on route change using `useEffect` with `location`.
+
+**Step 3: Add mobile card views for Rankings table**
+
+In `Rankings.jsx`, add two views:
+- `.desktop-only` table (hidden on mobile)
+- `.mobile-only` ranking cards: rank badge, username, total score
+
+```css
+.mobile-only { display: block; }
+.desktop-only { display: none; }
+
+@media (min-width: 768px) {
+  .mobile-only { display: none; }
+  .desktop-only { display: block; }
+}
+```
+
+Apply same pattern to `UsersList.jsx`.
+
+**Step 4: Fix quiz options layout for mobile**
+
+Replace `flex space-x-4` with stacking on small screens:
+
+```css
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (min-width: 480px) {
+  .options-grid { flex-direction: row; }
+}
+```
+
+**Step 5: Ensure all tap targets are >= 44px**
+
+Verify all buttons, links, and interactive elements have minimum 44x44px touch targets. Update padding on small elements if needed:
+
+```css
+@media (max-width: 767px) {
+  .btn { min-height: 44px; }
+  .nav-link { min-height: 44px; display: flex; align-items: center; }
+  .option-label { min-height: 44px; }
+}
+```
+
+**Step 6: Test on multiple screen sizes**
 
 Use browser dev tools to test at: 375px, 414px, 768px, 1024px, 1440px.
+Verify: no horizontal scrolling at 375px, hamburger works, cards vs tables, stacking.
 
-**Step 4: Commit**
+**Step 7: Commit**
 
 ```bash
 git add -A
@@ -2225,7 +2345,252 @@ git commit -m "feat: mobile-first responsive CSS polish"
 
 ---
 
-## Task 16: Final Testing & Deployment
+## Task 16: Firebase Analytics
+
+**Files:**
+- Modify: `src/firebase.js` — add Analytics init and event helpers
+- Modify: `src/main.jsx` — move BrowserRouter here for location tracking
+- Modify: `src/App.jsx` — add page view tracking
+- Modify: `src/components/auth/Login.jsx` — track login/signup events
+- Modify: `src/components/quiz/QuizGame.jsx` — track quiz_start and quiz_submit events
+- Modify: `.env.example` — add `VITE_FIREBASE_MEASUREMENT_ID`
+
+**Step 1: Add Analytics to `src/firebase.js`**
+
+```js
+import { getAnalytics, logEvent } from "firebase/analytics";
+
+const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+
+export const trackEvent = (eventName, params = {}) => {
+  if (analytics) logEvent(analytics, eventName, params);
+};
+
+export const trackQuizStart = (quizId, title) =>
+  trackEvent('quiz_start', { quiz_id: quizId, quiz_title: title });
+
+export const trackQuizSubmit = (quizId, title, count) =>
+  trackEvent('quiz_submit', { quiz_id: quizId, quiz_title: title, questions_answered: count });
+
+export const trackLogin = () => trackEvent('login', { method: 'email' });
+export const trackSignUp = () => trackEvent('sign_up', { method: 'email' });
+```
+
+Add `VITE_FIREBASE_MEASUREMENT_ID` to `.env.example` and the firebaseConfig object.
+
+**Step 2: Add page view tracking to `src/App.jsx`**
+
+```jsx
+import { useLocation } from 'react-router-dom';
+import { trackEvent } from './firebase';
+
+// Inside App component:
+const location = useLocation();
+useEffect(() => {
+  trackEvent('page_view', { page_path: location.pathname });
+}, [location]);
+```
+
+Note: This requires `App` to be inside `<Router>`. Move `BrowserRouter` from `App.jsx` to `main.jsx` wrapping `<App />`, then use `useLocation` directly in App.
+
+**Step 3: Add event tracking to components**
+
+In `Login.jsx`, after successful login/signup:
+```jsx
+import { trackLogin, trackSignUp } from '../../firebase';
+// After successful login:
+trackLogin();
+// After successful signup:
+trackSignUp();
+```
+
+In `QuizGame.jsx`, on quiz load and submit:
+```jsx
+import { trackQuizStart, trackQuizSubmit } from '../../firebase';
+// When quiz loads:
+trackQuizStart(currentQuiz.id, currentQuiz.title);
+// On submit:
+trackQuizSubmit(currentQuiz.id, currentQuiz.title, Object.keys(answers).length);
+```
+
+**Step 4: Verify**
+
+Open DevTools → Network tab → filter for `google-analytics` or `firebase`.
+Navigate through app: page_view events fire per route. Login, load quiz, submit → events fire.
+
+**Step 5: Commit**
+
+```bash
+git add -A
+git commit -m "feat: add Firebase Analytics with page views and event tracking"
+```
+
+---
+
+## Task 17: PWA Install Prompt
+
+**Files:**
+- Create: `src/components/pages/InstallPrompt.jsx`
+- Modify: `src/App.jsx` — render InstallPrompt
+
+**Step 1: Create `src/components/pages/InstallPrompt.jsx`**
+
+```jsx
+import React, { useState, useEffect } from 'react';
+
+const InstallPrompt = () => {
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showPrompt, setShowPrompt] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowPrompt(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    setDeferredPrompt(null);
+    setShowPrompt(false);
+  };
+
+  if (!showPrompt) return null;
+
+  return (
+    <div style={{
+      position: 'fixed',
+      bottom: '80px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      backgroundColor: 'var(--wc-surface)',
+      border: '1px solid var(--wc-border)',
+      borderRadius: '12px',
+      padding: '16px 24px',
+      zIndex: 999,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '16px',
+      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)',
+    }}>
+      <span style={{ color: 'var(--wc-text)', fontSize: '14px' }}>
+        Install we-check.ing for quick access
+      </span>
+      <button onClick={handleInstall} className="btn btn-small">
+        Install
+      </button>
+      <button
+        onClick={() => setShowPrompt(false)}
+        className="btn btn-small btn-secondary"
+      >
+        Dismiss
+      </button>
+    </div>
+  );
+};
+
+export default InstallPrompt;
+```
+
+**Step 2: Render in `src/App.jsx`**
+
+```jsx
+import InstallPrompt from './components/pages/InstallPrompt';
+
+// Inside return, alongside CookieConsent:
+<InstallPrompt />
+```
+
+**Step 3: Verify**
+
+Test on mobile Chrome — "Install" banner appears. App installs to home screen.
+
+**Step 4: Commit**
+
+```bash
+git add -A
+git commit -m "feat: add PWA install prompt"
+```
+
+---
+
+## Task 18: Social Sharing
+
+**Files:**
+- Create: `src/components/quiz/ShareButton.jsx`
+- Modify: `src/components/quiz/QuizGame.jsx` — render ShareButton after results
+- Modify: `src/components/dashboard/Dashboard.jsx` — optional share per quiz row
+
+**Step 1: Create `src/components/quiz/ShareButton.jsx`**
+
+```jsx
+import React from 'react';
+
+const ShareButton = ({ quizTitle, score, total }) => {
+  const text = `I scored ${score}/${total} on "${quizTitle}" at we-check.ing! We are checking... can you beat me? 🤡`;
+  const url = 'https://we-check.ing';
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'we-check.ing', text, url });
+      } catch (e) {
+        // User cancelled share, ignore
+      }
+    } else {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      alert('Copied to clipboard!');
+    }
+  };
+
+  return (
+    <button onClick={handleShare} className="btn btn-small btn-secondary">
+      Share Result
+    </button>
+  );
+};
+
+export default ShareButton;
+```
+
+**Step 2: Add to QuizGame results section**
+
+In `QuizGame.jsx`, after the score display in the results section:
+
+```jsx
+import ShareButton from './ShareButton';
+
+// After score display, when quiz is closed and score is available:
+{quizClosed && score !== undefined && (
+  <ShareButton
+    quizTitle={currentQuiz.title}
+    score={score}
+    total={currentQuiz.questions.length}
+  />
+)}
+```
+
+**Step 3: Verify**
+
+Complete a scored quiz → see "Share Result" button → click → native share sheet on mobile, clipboard copy on desktop.
+
+**Step 4: Commit**
+
+```bash
+git add -A
+git commit -m "feat: add social sharing for quiz results"
+```
+
+---
+
+## Task 19: Final Testing & Deployment
+
+> This was previously Task 16. Renumbered due to added tasks.
 
 **Files:**
 - Modify: `public/manifest.json` — update app name
@@ -2283,13 +2648,21 @@ Navigate through all pages, test all flows.
 - [ ] Cookie consent is remembered after acceptance
 - [ ] Language switching works for all 6 languages
 - [ ] 404 page renders for unknown routes
-- [ ] Mobile responsive on all pages
-- [ ] Header navigation works on mobile
+- [ ] Mobile responsive on all pages (test at 375px, 768px, 1024px)
+- [ ] Hamburger menu works on mobile
+- [ ] Rankings show cards on mobile, table on desktop
+- [ ] All tap targets >= 44px on mobile
 - [ ] Footer links work
 - [ ] Admin can create quizzes
 - [ ] Admin can set answers and scores calculate
 - [ ] Push notification opt-in works
 - [ ] Dark theme looks correct on all pages
+- [ ] Analytics events visible in Network tab (page_view, login, quiz_start, quiz_submit)
+- [ ] OG meta tags present in page source
+- [ ] PWA install banner appears on mobile Chrome
+- [ ] Share button works after quiz scoring (native share or clipboard)
+- [ ] `firebase deploy --only hosting` works
+- [ ] `firebase deploy --only functions` works
 
 **Step 5: Deploy to Firebase**
 
@@ -2315,20 +2688,23 @@ git commit -m "feat: finalize we-check.ing for public launch"
 
 | Task | Description | Estimated Steps |
 |------|------------|----------------|
-| 1 | CRA → Vite migration | 11 |
+| 1 | CRA → Vite migration (+ postcss/tailwind config, remove test deps) | 13 |
 | 2 | Project structure reorganization | 7 |
 | 3 | Rebrand - colors & typography | 7 |
 | 4 | Layout components (Header/Footer/Layout) | 6 |
 | 5 | Password reset flow | 6 |
-| 6 | Landing page + useAuth hook | 5 |
+| 6 | Landing page + useAuth hook + SEO meta tags | 6 |
 | 7 | User dashboard | 4 |
 | 8 | Legal pages (Privacy, Terms, Cookie Consent) | 6 |
 | 9 | i18n with 6 languages | 9 |
-| 10 | Firebase Cloud Functions | 5 |
+| 10 | Firebase Cloud Functions (+ .gitignore) | 6 |
 | 11 | Push notifications (FCM) | 7 |
 | 12 | Email notifications (SendGrid) | 4 |
 | 13 | Leaderboard enhancements | 3 |
 | 14 | Meme copy & 404 page | 5 |
-| 15 | Mobile-first CSS polish | 4 |
-| 16 | Testing & deployment | 7 |
-| **Total** | | **100 steps** |
+| 15 | Mobile-first CSS (hamburger, card views, tap targets) | 7 |
+| 16 | Firebase Analytics | 5 |
+| 17 | PWA Install Prompt | 4 |
+| 18 | Social Sharing | 4 |
+| 19 | Testing & deployment | 7 |
+| **Total** | | **118 steps** |
