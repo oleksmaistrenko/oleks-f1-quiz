@@ -1,13 +1,14 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import QuizGame from "./components/QuizGame";
-import QuizAdmin from "./components/QuizAdmin";
-import Login from "./components/Login";
-import Header from "./components/Header";
-import UsersList from "./components/UsersList";
-import Rankings from "./components/Rankings";
-import Rules from "./components/Rules";
-import "./index.css";
+import QuizGame from "./components/quiz/QuizGame";
+import QuizAdmin from "./components/quiz/QuizAdmin";
+import Login from "./components/auth/Login";
+import Header from "./components/layout/Header";
+import UsersList from "./components/admin/UsersList";
+import Rankings from "./components/pages/Rankings";
+import Rules from "./components/pages/Rules";
+import "./styles/index.css";
+import "./styles/App.css";
 
 function App() {
   return (

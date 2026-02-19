@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs, query, orderBy, doc, getDoc } from "firebase/firestore";
-import { db, auth } from "../firebase";
+import { db, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
@@ -193,13 +193,13 @@ const Rankings = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border p-2 text-left" style={{ backgroundColor: 'var(--f1-black)', color: 'var(--f1-white)' }}>Rank</th>
-                <th className="border p-2 text-left" style={{ backgroundColor: 'var(--f1-black)', color: 'var(--f1-white)' }}>Player</th>
-                <th className="border p-2 text-left" style={{ backgroundColor: 'var(--f1-black)', color: 'var(--f1-white)' }}>Total Points</th>
+                <th className="border p-2 text-left" style={{ backgroundColor: 'var(--wc-carbon)', color: 'var(--wc-text)' }}>Rank</th>
+                <th className="border p-2 text-left" style={{ backgroundColor: 'var(--wc-carbon)', color: 'var(--wc-text)' }}>Player</th>
+                <th className="border p-2 text-left" style={{ backgroundColor: 'var(--wc-carbon)', color: 'var(--wc-text)' }}>Total Points</th>
                 
                 {/* Quiz columns */}
                 {quizzes.map(quiz => (
-                  <th key={quiz.id} className="border p-2 text-left" style={{ backgroundColor: 'var(--f1-black)', color: 'var(--f1-white)' }}>
+                  <th key={quiz.id} className="border p-2 text-left" style={{ backgroundColor: 'var(--wc-carbon)', color: 'var(--wc-text)' }}>
                     {quiz.title}
                   </th>
                 ))}
@@ -210,7 +210,7 @@ const Rankings = () => {
                 <tr key={user.id} className={index % 2 === 0 ? "bg-gray-50" : ""}>
                   <td className="border p-2">{index + 1}</td>
                   <td className="border p-2 font-medium">{user.username}</td>
-                  <td className="border p-2 font-bold" style={{ color: 'var(--f1-red)' }}>
+                  <td className="border p-2 font-bold" style={{ color: 'var(--wc-red)' }}>
                     {totalScores[user.id] || 0}
                   </td>
                   

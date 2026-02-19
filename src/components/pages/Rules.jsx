@@ -3,11 +3,11 @@ import React from "react";
 const Rules = () => {
   return (
     <div className="card">
-      <h1 className="card-title">F1 Quiz Rules</h1>
+      <h1 className="card-title">Quiz Rules</h1>
       
       <div className="rules-container">
         <div className="rule-section">
-          <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--f1-red)' }}>How to Play</h2>
+          <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--wc-red)' }}>How to Play</h2>
           <p className="mb-4">
             Before each race, you'll receive three Yes/No questions about the approaching race.
           </p>
@@ -23,7 +23,7 @@ const Rules = () => {
         </div>
 
         <div className="rule-section mt-8">
-          <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--f1-red)' }}>Tips</h2>
+          <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--wc-red)' }}>Tips</h2>
           <ul className="list-disc pl-5 space-y-2">
             <li>You can edit your answers any time before the quiz deadline</li>
             <li>The leaderboard updates after each race once the quiz is scored</li>

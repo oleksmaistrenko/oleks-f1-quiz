@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginWithEmail, registerWithEmail, auth } from "../firebase";
+import { loginWithEmail, registerWithEmail, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 const Login = () => {
@@ -63,9 +63,9 @@ const Login = () => {
   };
 
   return (
-    <div className="card racing-pattern">
+    <div className="card">
       <h1 className="card-title text-center">
-        {isRegistering ? "Create an Account" : "Login to F1 Quiz"}
+        {isRegistering ? "Create an Account" : "Login to we-check.ing"}
       </h1>
 
       {error && (

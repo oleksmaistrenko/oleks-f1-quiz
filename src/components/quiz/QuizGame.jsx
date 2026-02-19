@@ -11,7 +11,7 @@ import {
   setDoc,
   Timestamp,
 } from "firebase/firestore";
-import { db, auth } from "../firebase";
+import { db, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 const QuizGame = () => {
@@ -270,13 +270,13 @@ const QuizGame = () => {
   }
 
   return (
-    <div className="card racing-pattern">
+    <div className="card">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <h1 className="card-title">{currentQuiz.title}</h1>
           <div className="timer">
             {quizClosed ? (
-              <span style={{ color: 'var(--f1-red)' }}>{timeRemaining}</span>
+              <span style={{ color: 'var(--wc-red)' }}>{timeRemaining}</span>
             ) : (
               <span>{timeRemaining}</span>
             )}
@@ -305,7 +305,7 @@ const QuizGame = () => {
                       <label
                         className={`option-label ${
                           answers[question.id] === option
-                            ? "bg-blue-50 border-l-4 border-l-[var(--f1-red)]"
+                            ? "bg-blue-50 border-l-4 border-l-[var(--wc-red)]"
                             : ""
                         }`}
                       >
@@ -374,7 +374,7 @@ const QuizGame = () => {
                   </span>
                 </p>
                 {question.correctAnswer ? (
-                  <p style={{ color: "var(--f1-red)" }} className="font-medium mt-1">
+                  <p style={{ color: "var(--wc-red)" }} className="font-medium mt-1">
                     Correct answer: {question.correctAnswer}
                   </p>
                 ) : quizClosed ? (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, getAllUsers, updateUserRole, getUserProfile } from '../firebase';
+import { auth, getAllUsers, updateUserRole, getUserProfile } from '../../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const UsersList = () => {

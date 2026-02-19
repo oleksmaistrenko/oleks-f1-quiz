@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { auth, logout, getUserProfile } from "../firebase";
+import { auth, logout, getUserProfile } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 const Header = () => {
@@ -44,7 +44,7 @@ const Header = () => {
   return (
     <header className="header">
       <div className="container header-content">
-        <div className="header-title">Oleks F1 Quizz</div>
+        <div className="header-title">we-check.ing</div>
         
         <nav className="nav-menu">
           <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
@@ -76,7 +76,7 @@ const Header = () => {
                   {userProfile && (
                     <span className="text-sm" style={{ marginLeft: '20px' }}>
                       {userProfile.username} 
-                      {isAdmin && <span className="ml-1 text-xs" style={{background: 'var(--f1-accent)', padding: '2px 4px', borderRadius: '3px'}}>Admin</span>}
+                      {isAdmin && <span className="ml-1 text-xs" style={{background: 'var(--wc-gold)', padding: '2px 4px', borderRadius: '3px'}}>Admin</span>}
                     </span>
                   )}
                   <button 

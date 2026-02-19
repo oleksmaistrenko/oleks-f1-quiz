@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { collection, addDoc, getDocs, getDoc, doc, updateDoc, Timestamp, query, where } from "firebase/firestore";
-import { db, auth, logout, getUserProfile } from "../firebase";
+import { db, auth, logout, getUserProfile } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -652,7 +652,7 @@ const QuizAdmin = () => {
                     {question.options.map((option, oIndex) => (
                       <div key={oIndex} className="flex-1">
                         <label className={`option-label ${
-                          question.correctAnswer === option ? 'border-l-4 border-l-[var(--f1-red)]' : ''
+                          question.correctAnswer === option ? 'border-l-4 border-l-[var(--wc-red)]' : ''
                         }`}>
                           <input
                             type="radio"
@@ -713,7 +713,7 @@ const QuizAdmin = () => {
                   </div>
                   <p className="text-sm mb-3">
                     {quiz.hasAnswers ? 
-                      <span style={{ color: "var(--f1-red)" }}>Answers set ✓</span> : 
+                      <span style={{ color: "var(--wc-red)" }}>Answers set ✓</span> : 
                       <span className="text-orange-500">Answers not set</span>}
                   </p>
                   <div className="admin-controls">
