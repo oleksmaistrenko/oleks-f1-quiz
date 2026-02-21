@@ -9,10 +9,15 @@ import {
   limit,
   orderBy,
   setDoc,
+  updateDoc,
+  where,
   Timestamp,
 } from "firebase/firestore";
 import { db, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import CheckingOverlay from "../ui/CheckingOverlay";
+import { useToast } from "../ui/Toast";
+import { getNextRace, getDaysUntil } from "../../data/f1-calendar-2026";
 
 const QuizGame = () => {
   const { id } = useParams();
@@ -29,15 +34,26 @@ const QuizGame = () => {
   const [score, setScore] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState("");
   const [quizClosed, setQuizClosed] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  const [showChecking, setShowChecking] = useState(false);
+  const [distribution, setDistribution] = useState({});
+  const [showNotifPrompt, setShowNotifPrompt] = useState(false);
+  const [reminderSet, setReminderSet] = useState(false);
+  const addToast = useToast();
+  const nextRace = getNextRace();
 
   // Handle answer selection
   const handleAnswerSelect = (questionId, selectedAnswer) => {
+    const previousAnswer = answers[questionId];
     setAnswers({
       ...answers,
       [questionId]: selectedAnswer,
     });
+
+    if (previousAnswer && previousAnswer !== selectedAnswer) {
+      addToast(`Answer changed to ${selectedAnswer}`, "info", 2000);
+    } else if (!previousAnswer) {
+      addToast(`Locked in: ${selectedAnswer}`, "success", 2000);
+    }
   };
 
   // Check for authentication
@@ -199,18 +215,86 @@ const QuizGame = () => {
     return () => clearInterval(timer);
   }, [currentQuiz, submitted]);
 
+  // Fetch answer distribution when quiz is closed
+  useEffect(() => {
+    if (!currentQuiz || !quizClosed) return;
+
+    const fetchDistribution = async () => {
+      try {
+        const answersQuery = query(
+          collection(db, "quizAnswers"),
+          where("quizId", "==", currentQuiz.id)
+        );
+        const snapshot = await getDocs(answersQuery);
+
+        const dist = {};
+        currentQuiz.questions.forEach((q) => {
+          dist[q.id] = { Yes: 0, No: 0, total: 0 };
+        });
+
+        snapshot.forEach((answerDoc) => {
+          const data = answerDoc.data();
+          const userAnswers = data.answers || {};
+          Object.entries(userAnswers).forEach(([qId, answer]) => {
+            if (dist[qId] && (answer === "Yes" || answer === "No")) {
+              dist[qId][answer]++;
+              dist[qId].total++;
+            }
+          });
+        });
+
+        setDistribution(dist);
+      } catch (err) {
+        console.error("Error fetching distribution:", err);
+      }
+    };
+
+    fetchDistribution();
+  }, [currentQuiz, quizClosed]);
+
+  // Notification opt-in handlers
+  const handleNotifOptIn = async () => {
+    try {
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, { notificationOptIn: true });
+      addToast("You'll be notified about new quizzes!", "success");
+    } catch (e) {
+      console.error("Error saving notification preference:", e);
+    }
+    setShowNotifPrompt(false);
+  };
+
+  const handleNotifDismiss = () => {
+    setShowNotifPrompt(false);
+  };
+
+  // Remind me handler
+  const handleRemindMe = async () => {
+    try {
+      const reminderDocId = `${user.uid}_${currentQuiz.id}`;
+      await setDoc(doc(db, "reminders", reminderDocId), {
+        userId: user.uid,
+        quizId: currentQuiz.id,
+        quizTitle: currentQuiz.title,
+        remindAt: new Date(currentQuiz.timeLimit.getTime() - 2 * 60 * 60 * 1000),
+        createdAt: Timestamp.now(),
+      });
+      setReminderSet(true);
+      addToast("Reminder set! We'll nudge you before it closes.", "success");
+    } catch (e) {
+      console.error("Error setting reminder:", e);
+      addToast("Couldn't set reminder. Try again.", "error");
+    }
+  };
+
   // Submit quiz to Firebase
   const handleSubmit = async () => {
     if (!currentQuiz || !user) return;
 
     try {
-      setSubmitting(true);
-      setSubmitError(null);
+      setShowChecking(true);
 
-      // Create a document ID using user ID and quiz ID to ensure one submission per user per quiz
       const answersDocId = `${user.uid}_${currentQuiz.id}`;
-
-      // Prepare answers data
       const answersData = {
         userId: user.uid,
         username: userProfile?.username || "Unknown",
@@ -220,15 +304,32 @@ const QuizGame = () => {
         submittedAt: Timestamp.now(),
       };
 
-      // Save to Firestore
       await setDoc(doc(db, "quizAnswers", answersDocId), answersData);
 
+      // Hold the overlay for dramatic effect
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       setSubmitted(true);
-      setSubmitting(false);
+      setShowChecking(false);
+      addToast("Predictions locked in!", "success", 3000);
+
+      // Check if this is the user's first quiz — show notification opt-in
+      try {
+        const userAnswersQuery = query(
+          collection(db, "quizAnswers"),
+          where("userId", "==", user.uid)
+        );
+        const userAnswersSnapshot = await getDocs(userAnswersQuery);
+        if (userAnswersSnapshot.size <= 1) {
+          setShowNotifPrompt(true);
+        }
+      } catch (e) {
+        // Silently ignore — non-critical
+      }
     } catch (error) {
       console.error("Error submitting answers:", error);
-      setSubmitError("Failed to submit answers. Please try again.");
-      setSubmitting(false);
+      setShowChecking(false);
+      addToast("Failed to submit. Please try again.", "error", 5000);
     }
   };
 
@@ -271,6 +372,21 @@ const QuizGame = () => {
 
   return (
     <div className="card">
+      {nextRace && (
+        <div className="next-race-banner">
+          <div className="next-race-info">
+            <span className="next-race-label">Next Race Weekend</span>
+            <span className="next-race-name">{nextRace.name}</span>
+            <span className="next-race-location">{nextRace.location}</span>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div className="next-race-countdown">
+              {getDaysUntil(nextRace.date)}
+            </div>
+            <div className="next-race-countdown-label">days away</div>
+          </div>
+        </div>
+      )}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <h1 className="card-title">{currentQuiz.title}</h1>
@@ -328,25 +444,52 @@ const QuizGame = () => {
             </div>
           ))}
 
-          {submitError && (
-            <div className="alert alert-error">
-              {submitError}
+          <button
+            onClick={handleSubmit}
+            disabled={showChecking}
+            className={`btn btn-block ${showChecking ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            {submitted ? "Update Answers" : "Submit Answers"}
+          </button>
+          
+          {submitted && !showChecking && (
+            <div className="alert alert-success" style={{ marginTop: '16px' }}>
+              Predictions submitted. You can still edit until the quiz closes.
             </div>
           )}
 
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className={`btn btn-block ${
-              submitting ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            {submitting ? "Submitting..." : submitted ? "Update Answers" : "Submit Answers"}
-          </button>
-          
-          {submitted && (
-            <div className="mt-4 p-3 bg-green-100 rounded-md text-green-800 text-center">
-              Your answers have been submitted. You can still edit them until the quiz closes.
+          {!submitted && !reminderSet && (
+            <button
+              onClick={handleRemindMe}
+              className="btn btn-secondary btn-block"
+              style={{ marginTop: '12px' }}
+            >
+              Remind me before it closes
+            </button>
+          )}
+
+          {reminderSet && (
+            <div className="alert alert-success" style={{ marginTop: '12px' }}>
+              Reminder set for 2 hours before deadline.
+            </div>
+          )}
+
+          {showNotifPrompt && (
+            <div className="notif-prompt">
+              <div className="notif-prompt-title">
+                Want to know when results are in?
+              </div>
+              <div className="notif-prompt-text">
+                Get notified when new quizzes drop and when your scores are ready.
+              </div>
+              <div className="notif-prompt-actions">
+                <button className="btn btn-accent" onClick={handleNotifOptIn}>
+                  Yes, notify me
+                </button>
+                <button className="btn btn-secondary" onClick={handleNotifDismiss}>
+                  Not now
+                </button>
+              </div>
             </div>
           )}
         </>
@@ -382,10 +525,43 @@ const QuizGame = () => {
                     The correct answer will be revealed by the administrator
                   </p>
                 ) : null}
+                {distribution[question.id] && distribution[question.id].total > 0 && (
+                  <div style={{ marginTop: '8px' }}>
+                    <div className="text-xs text-gray-500" style={{ marginBottom: '4px' }}>
+                      Community predictions ({distribution[question.id].total} votes)
+                    </div>
+                    <div className="distribution-bar">
+                      <div
+                        className="distribution-segment distribution-segment-yes"
+                        style={{
+                          width: `${Math.round((distribution[question.id].Yes / distribution[question.id].total) * 100)}%`,
+                        }}
+                      >
+                        {distribution[question.id].Yes > 0 &&
+                          `Yes ${Math.round((distribution[question.id].Yes / distribution[question.id].total) * 100)}%`}
+                      </div>
+                      <div
+                        className="distribution-segment distribution-segment-no"
+                        style={{
+                          width: `${Math.round((distribution[question.id].No / distribution[question.id].total) * 100)}%`,
+                        }}
+                      >
+                        {distribution[question.id].No > 0 &&
+                          `No ${Math.round((distribution[question.id].No / distribution[question.id].total) * 100)}%`}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
+      )}
+      {showChecking && (
+        <CheckingOverlay
+          message="We are checking..."
+          subtext="Submitting your predictions"
+        />
       )}
     </div>
   );

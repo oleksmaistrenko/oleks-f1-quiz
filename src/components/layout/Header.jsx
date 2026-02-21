@@ -50,11 +50,19 @@ const Header = () => {
           <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
             Play
           </Link>
-          
+
+          <Link to="/dashboard" className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}>
+            Dashboard
+          </Link>
+
           <Link to="/rankings" className={`nav-link ${location.pathname === '/rankings' ? 'active' : ''}`}>
             Rankings
           </Link>
-          
+
+          <Link to="/head-to-head" className={`nav-link ${location.pathname === '/head-to-head' ? 'active' : ''}`}>
+            H2H
+          </Link>
+
           <Link to="/rules" className={`nav-link ${location.pathname === '/rules' ? 'active' : ''}`}>
             Rules
           </Link>

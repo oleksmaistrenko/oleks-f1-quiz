@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { collection, getDocs, query, orderBy, doc, getDoc } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -31,11 +31,10 @@ const Rankings = () => {
           const userDocRef = doc(db, "users", currentUser.uid);
           const userDocSnapshot = await getDoc(userDocRef);
           if (userDocSnapshot.exists()) {
-            const userData = userDocSnapshot.data();
-            console.log(`User role: ${userData.role}`);
+            // User profile loaded
           }
         } catch (err) {
-          console.error("Error fetching user profile:", err);
+          // Error fetching user profile
         }
       }
     });
@@ -43,109 +42,83 @@ const Rankings = () => {
     return () => unsubscribe();
   }, [navigate]);
 
-  // Fetch rankings data
+  // Real-time rankings listener
   useEffect(() => {
-    const fetchRankings = async () => {
-      if (!user) return;
+    if (!user) return;
 
-      try {
-        setLoading(true);
-        setError(null);
+    setLoading(true);
+    setError(null);
 
-        // Fetch all quizzes
-        const quizzesQuery = query(collection(db, "quizzes"), orderBy("createdAt", "desc"));
-        const quizzesSnapshot = await getDocs(quizzesQuery);
-        
-        const quizzes = quizzesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          title: doc.data().title,
-          ...doc.data()
-        }));
+    const quizzesQuery = query(collection(db, "quizzes"), orderBy("createdAt", "desc"));
+    const answersQuery = query(collection(db, "quizAnswers"));
 
-        // Fetch all user answers
-        const answersQuery = query(collection(db, "quizAnswers"));
-        const answersSnapshot = await getDocs(answersQuery);
+    let quizzesData = [];
+    let answersDataArr = [];
 
-        // Process answers
-        const userMap = new Map(); // Track unique users
-        const scoreMap = new Map(); // Track scores by user_quiz
-        const submissionMap = new Map(); // Track submissions by user_quiz
-        const totalScoreMap = new Map(); // Track total scores by user
+    const processData = () => {
+      const userMap = new Map();
+      const scoreMap = new Map();
+      const submissionMap = new Map();
+      const totalScoreMap = new Map();
 
-        console.log(`Found ${answersSnapshot.size} answer documents in rankings`);
-        
-        answersSnapshot.forEach(answerDoc => {
-          const answerData = answerDoc.data();
-          const userId = answerData.userId;
-          const quizId = answerData.quizId;
-          const username = answerData.username || "Unknown";
-          const hasScore = answerData.score !== undefined;
-          const score = hasScore ? answerData.score : 0;
-          
-          console.log(`User ${username} (${userId}) scored ${hasScore ? score : 'no score yet'} on quiz ${quizId}`);
-          
-          // Track unique users
-          if (!userMap.has(userId)) {
-            userMap.set(userId, { id: userId, username });
-          }
-          
-          // Track submissions for everyone who has answered
-          const key = `${userId}_${quizId}`;
-          submissionMap.set(key, true);
-          
-          // Only track scores if they have a score (not just a submission)
-          if (hasScore) {
-            scoreMap.set(key, score);
-            
-            // Update total score for user (only for scored quizzes)
-            const currentTotal = totalScoreMap.get(userId) || 0;
-            const newTotal = currentTotal + score;
-            console.log(`Adding ${score} to ${currentTotal} for total of ${newTotal}`);
-            totalScoreMap.set(userId, newTotal);
-          }
-        });
+      answersDataArr.forEach((answerData) => {
+        const userId = answerData.userId;
+        const quizId = answerData.quizId;
+        const username = answerData.username || "Unknown";
+        const hasScore = answerData.score !== undefined;
+        const score = hasScore ? answerData.score : 0;
 
-        // Convert maps to arrays/objects for state
-        const users = Array.from(userMap.values())
-          .sort((a, b) => {
-            // Sort by total score descending
-            const totalA = totalScoreMap.get(a.id) || 0;
-            const totalB = totalScoreMap.get(b.id) || 0;
-            return totalB - totalA;
-          });
+        if (!userMap.has(userId)) {
+          userMap.set(userId, { id: userId, username });
+        }
 
-        const scores = {};
-        scoreMap.forEach((score, key) => {
-          scores[key] = score;
-        });
+        const key = `${userId}_${quizId}`;
+        submissionMap.set(key, true);
 
-        const submissions = {};
-        submissionMap.forEach((value, key) => {
-          submissions[key] = value;
-        });
+        if (hasScore) {
+          scoreMap.set(key, score);
+          const currentTotal = totalScoreMap.get(userId) || 0;
+          totalScoreMap.set(userId, currentTotal + score);
+        }
+      });
 
-        const totalScores = {};
-        totalScoreMap.forEach((score, userId) => {
-          totalScores[userId] = score;
-        });
+      const users = Array.from(userMap.values()).sort((a, b) => {
+        const totalA = totalScoreMap.get(a.id) || 0;
+        const totalB = totalScoreMap.get(b.id) || 0;
+        return totalB - totalA;
+      });
 
-        setRankingsData({
-          users,
-          quizzes,
-          scores,
-          submissions,
-          totalScores,
-        });
+      const scores = {};
+      scoreMap.forEach((score, key) => { scores[key] = score; });
 
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching rankings:", error);
-        setError("Failed to load rankings data");
-        setLoading(false);
-      }
+      const submissions = {};
+      submissionMap.forEach((value, key) => { submissions[key] = value; });
+
+      const totalScores = {};
+      totalScoreMap.forEach((score, userId) => { totalScores[userId] = score; });
+
+      setRankingsData({ users, quizzes: quizzesData, scores, submissions, totalScores });
+      setLoading(false);
     };
 
-    fetchRankings();
+    const unsubQuizzes = onSnapshot(quizzesQuery, (snapshot) => {
+      quizzesData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        title: doc.data().title,
+        ...doc.data(),
+      }));
+      processData();
+    });
+
+    const unsubAnswers = onSnapshot(answersQuery, (snapshot) => {
+      answersDataArr = snapshot.docs.map((doc) => doc.data());
+      processData();
+    });
+
+    return () => {
+      unsubQuizzes();
+      unsubAnswers();
+    };
   }, [user]);
 
   if (loading) {
@@ -165,6 +138,26 @@ const Rankings = () => {
   }
 
   const { users, quizzes, scores, submissions, totalScores } = rankingsData;
+
+  const getRankTitle = (rank, totalUsers) => {
+    const titles = {
+      1: { label: "Strategy Chief", className: "rank-title-1" },
+      2: { label: "Pit Wall Genius", className: "rank-title-2" },
+      3: { label: "Smooth Operator", className: "rank-title-3" },
+    };
+
+    if (titles[rank]) return titles[rank];
+
+    if (rank === totalUsers && totalUsers > 3) {
+      return { label: "Backmarker", className: "rank-title-default" };
+    }
+
+    if (rank <= Math.ceil(totalUsers * 0.25)) {
+      return { label: "Points Finisher", className: "rank-title-default" };
+    }
+
+    return null;
+  };
 
   // Get the score or status for a specific user and quiz
   const getScore = (userId, quizId) => {
@@ -209,7 +202,15 @@ const Rankings = () => {
               {users.map((user, index) => (
                 <tr key={user.id} className={index % 2 === 0 ? "bg-gray-50" : ""}>
                   <td className="border p-2">{index + 1}</td>
-                  <td className="border p-2 font-medium">{user.username}</td>
+                  <td className="border p-2 font-medium">
+                    {user.username}
+                    {(() => {
+                      const title = getRankTitle(index + 1, users.length);
+                      return title ? (
+                        <span className={`rank-title ${title.className}`}>{title.label}</span>
+                      ) : null;
+                    })()}
+                  </td>
                   <td className="border p-2 font-bold" style={{ color: 'var(--wc-red)' }}>
                     {totalScores[user.id] || 0}
                   </td>

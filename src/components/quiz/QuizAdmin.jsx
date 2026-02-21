@@ -203,72 +203,15 @@ const QuizAdmin = () => {
   // Handle setting correct answers for a quiz
   const handleSetAnswers = async (quizId, updatedQuestions) => {
     try {
-      // Update quiz with correct answers
       const quizRef = doc(db, "quizzes", quizId);
       await updateDoc(quizRef, { questions: updatedQuestions });
-      
-      // Calculate scores for all user submissions for this quiz
-      const answersQuery = query(
-        collection(db, "quizAnswers"),
-        where("quizId", "==", quizId)
-      );
-      const answersSnapshot = await getDocs(answersQuery);
-      
-      // Process each user's answers and calculate their score
-      const batchUpdates = [];
-      console.log(`Found ${answersSnapshot.size} user answer submissions for this quiz`);
-      
-      answersSnapshot.forEach(answerDoc => {
-        const userData = answerDoc.data();
-        const userAnswers = userData.answers || {};
-        let score = 0;
-        
-        console.log("User answers:", JSON.stringify(userAnswers));
-        console.log("Questions with correct answers:", JSON.stringify(updatedQuestions));
-        
-        // Calculate score: +1 for each correct answer
-        updatedQuestions.forEach((question, index) => {
-          const questionId = `q${index + 1}`;
-          console.log(`Checking question ${questionId}: User answered: ${userAnswers[questionId]}, Correct answer: ${question.correctAnswer}`);
-          
-          if (
-            userAnswers[questionId] && 
-            question.correctAnswer && 
-            userAnswers[questionId] === question.correctAnswer
-          ) {
-            score += 1;
-            console.log(`Correct answer! +1 point. Current score: ${score}`);
-          }
-        });
-        
-        // Update the user's answer document with the score
-        const answerRef = doc(db, "quizAnswers", answerDoc.id);
-        console.log(`Updating document ${answerDoc.id} with final score: ${score}/${updatedQuestions.length}`);
-        
-        batchUpdates.push(updateDoc(answerRef, { 
-          score: score,
-          totalQuestions: updatedQuestions.length
-        }));
-      });
-      
-      // Execute all updates
-      console.log(`Executing ${batchUpdates.length} score updates...`);
-      if (batchUpdates.length > 0) {
-        await Promise.all(batchUpdates);
-        console.log('All score updates completed successfully!');
-      } else {
-        console.log('No score updates to process.');
-      }
-      
+
       // Refresh quiz list
       const querySnapshot = await getDocs(collection(db, "quizzes"));
       const updatedQuizzes = querySnapshot.docs.map((doc) => {
         const data = doc.data();
-        
-        // Check if quiz has any answers set
-        const hasAnswers = data.questions && 
+        const hasAnswers = data.questions &&
           data.questions.some(q => q.correctAnswer !== null && q.correctAnswer !== undefined && q.correctAnswer !== "");
-          
         return {
           id: doc.id,
           ...data,
@@ -277,12 +220,12 @@ const QuizAdmin = () => {
           hasAnswers: hasAnswers
         };
       });
-      
+
       setQuizzes(updatedQuizzes);
       setShowAnswersForm(false);
       setSelectedQuiz(null);
-      
-      alert("Answers set and scores calculated successfully!");
+
+      alert("Answers saved! Scores will be calculated automatically.");
     } catch (error) {
       console.error("Error updating quiz answers:", error);
       alert("Failed to update answers. Please try again.");
