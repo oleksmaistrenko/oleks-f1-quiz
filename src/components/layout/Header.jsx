@@ -95,9 +95,11 @@ const Header = () => {
                   </button>
                 </div>
               ) : (
-                <Link to="/login" className="btn">
-                  Login
-                </Link>
+                location.pathname !== '/login' && (
+                  <Link to="/login" className="btn">
+                    Login
+                  </Link>
+                )
               )}
             </>
           )}

@@ -63,66 +63,66 @@ const Login = () => {
   };
 
   return (
-    <div className="card">
-      <h1 className="card-title text-center">
-        {isRegistering ? "Create an Account" : "Login to we-check.ing"}
-      </h1>
+    <div className="max-w-md mx-auto">
+      <div className="card">
+        <h1 className="card-title text-center">
+          {isRegistering ? "Create an Account" : "Login to we-check.ing"}
+        </h1>
 
-      {error && (
-        <div className="alert alert-error mb-4">
-          {error}
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label className="form-label" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={handleEmailChange}
-            required
-            className="form-input"
-            placeholder="Enter your email"
-          />
-        </div>
-
-        {isRegistering && (
-          <div className="form-group">
-            <label className="form-label" htmlFor="username">
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={handleUsernameChange}
-              required
-              className="form-input"
-              placeholder="Choose a username"
-            />
+        {error && (
+          <div className="alert alert-error mb-4">
+            {error}
           </div>
         )}
 
-        <div className="form-group">
-          <label className="form-label" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={handlePasswordChange}
-            required
-            className="form-input"
-            placeholder="Enter your password"
-          />
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={handleEmailChange}
+              required
+              className="form-input"
+              placeholder="Enter your email"
+            />
+          </div>
 
-        <div className="flex flex-col space-y-4">
+          {isRegistering && (
+            <div className="form-group">
+              <label className="form-label" htmlFor="username">
+                Username
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={handleUsernameChange}
+                required
+                className="form-input"
+                placeholder="Choose a username"
+              />
+            </div>
+          )}
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="password">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={handlePasswordChange}
+              required
+              className="form-input"
+              placeholder="Enter your password"
+            />
+          </div>
+
           <button
             type="submit"
             disabled={loading}
@@ -137,17 +137,20 @@ const Login = () => {
               : "Login"}
           </button>
 
-          <button
-            type="button"
-            onClick={() => setIsRegistering(!isRegistering)}
-            className="btn btn-small btn-secondary"
-          >
+          <p className="text-center text-sm" style={{ marginTop: "16px" }}>
             {isRegistering
-              ? "Already have an account? Login"
-              : "Don't have an account? Register"}
-          </button>
-        </div>
-      </form>
+              ? "Already have an account? "
+              : "Don't have an account? "}
+            <span
+              onClick={() => setIsRegistering(!isRegistering)}
+              className="text-blue-500"
+              style={{ cursor: "pointer" }}
+            >
+              {isRegistering ? "Login" : "Register"}
+            </span>
+          </p>
+        </form>
+      </div>
     </div>
   );
 };
