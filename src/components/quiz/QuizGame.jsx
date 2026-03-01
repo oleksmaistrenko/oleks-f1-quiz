@@ -364,7 +364,7 @@ const QuizGame = () => {
               <span className="next-race-name">{nextRace.name}</span>
               <span className="next-race-location">{nextRace.location}</span>
             </div>
-            <div style={{ textAlign: "right" }}>
+            <div className="next-race-countdown-wrap">
               <div className="next-race-countdown">
                 {getDaysUntil(nextRace.date)}
               </div>
@@ -391,7 +391,7 @@ const QuizGame = () => {
             <span className="next-race-name">{nextRace.name}</span>
             <span className="next-race-location">{nextRace.location}</span>
           </div>
-          <div style={{ textAlign: "right" }}>
+          <div className="next-race-countdown-wrap">
             <div className="next-race-countdown">
               {getDaysUntil(nextRace.date)}
             </div>

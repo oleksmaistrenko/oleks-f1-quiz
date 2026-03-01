@@ -32,6 +32,13 @@
     justify-content: space-between;
     padding: 14px 0;
     gap: 16px;
+    position: relative;
+}
+
+@media (max-width: 767px) {
+    .header .container {
+        padding: 0 16px;
+    }
 }
 
 .header-title {
@@ -113,6 +120,48 @@
     padding: 2px 6px;
     border-radius: 3px;
     margin-left: 6px;
+}
+
+/* Header nav wrapper (desktop: inline, mobile: dropdown) */
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex: 1;
+    justify-content: space-between;
+}
+
+/* Hamburger toggle — hidden on desktop */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    z-index: 101;
+}
+
+.menu-toggle-bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background-color: var(--wc-text);
+    border-radius: 1px;
+    transition: transform 0.25s, opacity 0.25s;
+}
+
+.menu-toggle-bar.open:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.menu-toggle-bar.open:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle-bar.open:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
 }
 
 /* ── Cards ─────────────────────────────────── */
@@ -1039,6 +1088,10 @@ button.bg-green-500:hover {
     margin-top: 2px;
 }
 
+.next-race-countdown-wrap {
+    text-align: right;
+}
+
 .next-race-countdown {
     font-family: "JetBrains Mono", monospace;
     font-size: 28px;
@@ -1187,13 +1240,53 @@ button.bg-green-500:hover {
 /* ── Responsive ────────────────────────────── */
 @media (max-width: 767px) {
     .header-content {
-        flex-wrap: wrap;
-        gap: 10px;
+        flex-wrap: nowrap;
+        gap: 0;
+    }
+
+    .menu-toggle {
+        display: flex;
+    }
+
+    .header-nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: -16px;
+        right: -16px;
+        background-color: var(--wc-carbon);
+        border-bottom: 2px solid var(--wc-red);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        flex-direction: column;
+        padding: 16px 20px;
+        gap: 16px;
+        z-index: 100;
+    }
+
+    .header-nav-open {
+        display: flex;
     }
 
     .nav-menu {
-        gap: 16px;
-        flex-wrap: wrap;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+    }
+
+    .nav-link {
+        font-size: 14px;
+        padding: 8px 0;
+    }
+
+    .nav-link::after {
+        display: none;
+    }
+
+    .header-user {
+        padding-top: 12px;
+        border-top: 1px solid var(--wc-border);
+        width: 100%;
+        justify-content: space-between;
     }
 
     .card {
@@ -1219,7 +1312,7 @@ button.bg-green-500:hover {
         gap: 12px;
     }
 
-    .next-race-countdown-label {
+    .next-race-countdown-wrap {
         text-align: center;
     }
 }
@@ -1254,6 +1347,101 @@ button.bg-green-500:hover {
 
     .score {
         font-size: 40px;
+    }
+}
+
+/* ── Landing Page ─────────────────────────── */
+.landing-page {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.landing-hero {
+    text-align: center;
+    padding: var(--space-2xl) 0 var(--space-xl);
+}
+
+.landing-headline {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    color: var(--wc-text);
+    margin-bottom: var(--space-md);
+}
+
+.landing-subtext {
+    font-size: 17px;
+    color: var(--wc-text-secondary);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto var(--space-lg);
+}
+
+/* Pitch cards */
+.landing-pitch {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: var(--space-xl);
+}
+
+.pitch-card {
+    background-color: var(--wc-surface);
+    border: 1px solid var(--wc-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+}
+
+.pitch-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--wc-red);
+    margin-bottom: var(--space-sm);
+}
+
+.pitch-text {
+    font-size: 15px;
+    color: var(--wc-text-secondary);
+    line-height: 1.55;
+}
+
+/* Testimonial */
+.landing-testimonial {
+    text-align: center;
+    padding: var(--space-lg) var(--space-xl);
+    margin-bottom: var(--space-xl);
+    border-top: 1px solid var(--wc-border);
+    border-bottom: 1px solid var(--wc-border);
+}
+
+.testimonial-prefix {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--wc-text-muted);
+    margin-bottom: var(--space-sm);
+}
+
+.testimonial-quote {
+    font-size: 19px;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--wc-text);
+    line-height: 1.5;
+    margin: 0;
+}
+
+@media (max-width: 767px) {
+    .landing-pitch {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-testimonial {
+        padding: var(--space-lg) var(--space-md);
     }
 }
 

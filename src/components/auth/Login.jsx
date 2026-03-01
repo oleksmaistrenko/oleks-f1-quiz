@@ -80,7 +80,50 @@ const Login = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="landing-page">
+      {/* Hero */}
+      <section className="landing-hero">
+        <h1 className="landing-headline">The F1 quiz where nobody knows the answer</h1>
+        <p className="landing-subtext">
+          Born from 4 seasons of family arguments and group chat chaos. Not your usual "who won the race" trivia.
+        </p>
+        <button className="btn" onClick={() => document.getElementById('auth-form').scrollIntoView({ behavior: 'smooth' })}>
+          Radio In
+        </button>
+      </section>
+
+      {/* Pitch */}
+      <section className="landing-pitch">
+        <div className="pitch-card">
+          <h3 className="pitch-title">Awkward questions</h3>
+          <p className="pitch-text">
+            "Will it be possible to spell SINGAPORE from the top-ten drivers' abbreviations?" You won't find the answer on Wikipedia.
+          </p>
+        </div>
+        <div className="pitch-card">
+          <h3 className="pitch-title">The whole grid</h3>
+          <p className="pitch-text">
+            Forget just the winners. This game makes you care about P14.
+          </p>
+        </div>
+        <div className="pitch-card">
+          <h3 className="pitch-title">Pure gamble</h3>
+          <p className="pitch-text">
+            Sometimes you know. Most times you don't. Like the sport itself.
+          </p>
+        </div>
+      </section>
+
+      {/* Testimonial */}
+      <section className="landing-testimonial">
+        <div className="testimonial-prefix">DRIVER:</div>
+        <blockquote className="testimonial-quote">
+          "Your game united our family. We discuss and quarrel about it."
+        </blockquote>
+      </section>
+
+      {/* Auth form */}
+      <div id="auth-form" className="max-w-md mx-auto">
       <div className="card">
         <h1 className="card-title text-center">
           {isRegistering ? "New Driver Registration" : "Radio In"}
@@ -206,6 +249,7 @@ const Login = () => {
             </span>
           </p>
         </form>
+      </div>
       </div>
     </div>
   );
