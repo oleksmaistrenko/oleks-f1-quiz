@@ -4,11 +4,14 @@ import QuizGame from "./components/quiz/QuizGame";
 import QuizAdmin from "./components/quiz/QuizAdmin";
 import Login from "./components/auth/Login";
 import Header from "./components/layout/Header";
+import Footer from "./components/layout/Footer";
 import UsersList from "./components/admin/UsersList";
 import Rankings from "./components/pages/Rankings";
 import Rules from "./components/pages/Rules";
 import HeadToHead from "./components/pages/HeadToHead";
 import Dashboard from "./components/pages/Dashboard";
+import Terms from "./components/pages/Terms";
+import Privacy from "./components/pages/Privacy";
 import { ToastProvider } from "./components/ui/Toast";
 import "./styles/index.css";
 import "./styles/App.css";
@@ -31,9 +34,12 @@ function App() {
                 <Route path="/rules" element={<Rules />} />
                 <Route path="/head-to-head" element={<HeadToHead />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
               </Routes>
             </div>
           </main>
+          <Footer />
         </div>
       </ToastProvider>
     </Router>
