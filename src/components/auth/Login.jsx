@@ -151,9 +151,9 @@ const Login = () => {
               />
               <label htmlFor="terms" className="text-secondary" style={{ fontSize: "13px", lineHeight: "1.5", cursor: "pointer" }}>
                 I agree to the{" "}
-                <Link to="/terms" className="text-red" target="_blank">Terms of Service</Link>
+                <Link to="/terms" className="text-red" target="_blank" rel="noopener noreferrer">Terms of Service</Link>
                 {" "}and{" "}
-                <Link to="/privacy" className="text-red" target="_blank">Privacy Policy</Link>
+                <Link to="/privacy" className="text-red" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
               </label>
             </div>
           )}

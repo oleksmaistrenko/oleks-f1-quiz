@@ -8,7 +8,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -48,7 +48,7 @@ export const registerWithEmail = async (email, password, username) => {
     email: email,
     username: username,
     createdAt: new Date(),
-    termsAcceptedAt: new Date(),
+    termsAcceptedAt: serverTimestamp(),
     role: isFirstUser ? "admin" : "user" // First user gets admin role
   });
 
