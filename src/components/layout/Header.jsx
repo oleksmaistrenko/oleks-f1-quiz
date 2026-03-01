@@ -14,9 +14,8 @@ const Header = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      
+
       if (currentUser) {
-        // Fetch user profile to check if admin
         try {
           const profile = await getUserProfile(currentUser.uid);
           setUserProfile(profile);
@@ -25,7 +24,7 @@ const Header = () => {
           console.error("Error fetching user profile:", error);
         }
       }
-      
+
       setLoading(false);
     });
 
@@ -41,69 +40,51 @@ const Header = () => {
     }
   };
 
+  const navLinkClass = (path) =>
+    `nav-link ${location.pathname === path ? 'active' : ''}`;
+
   return (
     <header className="header">
       <div className="container header-content">
-        <div className="header-title">we-check.ing</div>
-        
+        <Link to="/" className="header-title">we-check.ing</Link>
+
         <nav className="nav-menu">
-          <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
-            Play
-          </Link>
+          <Link to="/" className={navLinkClass('/')}>Play</Link>
+          <Link to="/dashboard" className={navLinkClass('/dashboard')}>Pit Wall</Link>
+          <Link to="/rankings" className={navLinkClass('/rankings')}>Rankings</Link>
+          <Link to="/head-to-head" className={navLinkClass('/head-to-head')}>H2H</Link>
+          <Link to="/rules" className={navLinkClass('/rules')}>Briefing</Link>
+          {isAdmin && (
+            <>
+              <Link to="/admin" className={navLinkClass('/admin')}>Admin</Link>
+              <Link to="/users" className={navLinkClass('/users')}>Users</Link>
+            </>
+          )}
+        </nav>
 
-          <Link to="/dashboard" className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}>
-            Dashboard
-          </Link>
-
-          <Link to="/rankings" className={`nav-link ${location.pathname === '/rankings' ? 'active' : ''}`}>
-            Rankings
-          </Link>
-
-          <Link to="/head-to-head" className={`nav-link ${location.pathname === '/head-to-head' ? 'active' : ''}`}>
-            H2H
-          </Link>
-
-          <Link to="/rules" className={`nav-link ${location.pathname === '/rules' ? 'active' : ''}`}>
-            Rules
-          </Link>
-          
+        <div className="header-user">
           {!loading && (
             <>
               {user ? (
-                <div className="flex items-center" style={{ marginLeft: '20px' }}>
-                  {isAdmin && (
-                    <div className="nav-menu">
-                      <Link to="/admin" className={`nav-link ${location.pathname === '/admin' ? 'active' : ''}`}>
-                        Admin
-                      </Link>
-                      <Link to="/users" className={`nav-link ${location.pathname === '/users' ? 'active' : ''}`}>
-                        Users
-                      </Link>
-                    </div>
-                  )}
+                <>
                   {userProfile && (
-                    <span className="text-sm" style={{ marginLeft: '20px' }}>
-                      {userProfile.username} 
-                      {isAdmin && <span className="ml-1 text-xs" style={{background: 'var(--wc-gold)', padding: '2px 4px', borderRadius: '3px'}}>Admin</span>}
+                    <span className="header-username">
+                      {userProfile.username}
+                      {isAdmin && <span className="header-admin-badge">Admin</span>}
                     </span>
                   )}
-                  <button 
-                    onClick={handleLogout}
-                    className="btn btn-small"
-                    style={{ marginLeft: '20px' }}>
-                    Logout
+                  <button onClick={handleLogout} className="btn btn-small btn-secondary">
+                    Radio Out
                   </button>
-                </div>
+                </>
               ) : (
                 location.pathname !== '/login' && (
-                  <Link to="/login" className="btn">
-                    Login
-                  </Link>
+                  <Link to="/login" className="btn btn-small">Radio In</Link>
                 )
               )}
             </>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   );

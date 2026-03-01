@@ -50,9 +50,9 @@ const QuizGame = () => {
     });
 
     if (previousAnswer && previousAnswer !== selectedAnswer) {
-      addToast(`Answer changed to ${selectedAnswer}`, "info", 2000);
+      addToast(`Understood, changing to ${selectedAnswer}`, "info", 2000);
     } else if (!previousAnswer) {
-      addToast(`Locked in: ${selectedAnswer}`, "success", 2000);
+      addToast(`Copy. ${selectedAnswer}.`, "success", 2000);
     }
   };
 
@@ -62,10 +62,8 @@ const QuizGame = () => {
       setUser(currentUser);
 
       if (!currentUser) {
-        // Redirect to login if not authenticated
         navigate("/login");
       } else {
-        // Fetch user profile to get username
         try {
           const userProfileRef = doc(db, "users", currentUser.uid);
           const profileSnap = await getDoc(userProfileRef);
@@ -87,14 +85,13 @@ const QuizGame = () => {
   // Fetch quiz data
   useEffect(() => {
     const fetchQuiz = async () => {
-      if (authLoading || !user) return; // Don't fetch if not authenticated yet
+      if (authLoading || !user) return;
 
       try {
         setLoading(true);
         let quizDoc;
 
         if (id) {
-          // Fetch specific quiz by ID
           quizDoc = await getDoc(doc(db, "quizzes", id));
 
           if (!quizDoc.exists()) {
@@ -103,12 +100,9 @@ const QuizGame = () => {
             return;
           }
         } else {
-          // Fetch the latest quiz if no ID is provided (sorted by creation time)
           const querySnapshot = await getDocs(
             query(
-              collection(db, "quizzes"), 
-              // Order by creation time, descending (newest first)
-              // Add index in Firebase console if needed: collection 'quizzes', field 'createdAt' descending
+              collection(db, "quizzes"),
               orderBy("createdAt", "desc"),
               limit(1)
             )
@@ -125,7 +119,6 @@ const QuizGame = () => {
 
         const quizData = quizDoc.data();
 
-        // Convert Firestore timestamp to Date object
         const endTime =
           quizData.endTime instanceof Date
             ? quizData.endTime
@@ -142,12 +135,10 @@ const QuizGame = () => {
             id: `q${index + 1}`,
             text: q.text,
             options: q.options,
-            // Only include correctAnswer if quiz has ended and answers are set
             correctAnswer: quizEnded ? q.correctAnswer : null,
           })),
         });
 
-        // Check if user has already submitted answers for this quiz
         if (user) {
           try {
             const userAnswersRef = doc(
@@ -158,7 +149,6 @@ const QuizGame = () => {
             const userAnswersSnap = await getDoc(userAnswersRef);
 
             if (userAnswersSnap.exists()) {
-              // User has already submitted answers for this quiz
               const userAnswersData = userAnswersSnap.data();
               setAnswers(userAnswersData.answers || {});
               if (userAnswersData.score !== undefined) {
@@ -193,7 +183,7 @@ const QuizGame = () => {
       if (now >= timeLimit) {
         setQuizClosed(true);
         clearInterval(timer);
-        setTimeRemaining("Quiz closed");
+        setTimeRemaining("Chequered flag");
 
         if (!submitted) {
           handleSubmit();
@@ -203,11 +193,11 @@ const QuizGame = () => {
         const hours = Math.floor(diff / 3600000);
         const minutes = Math.floor((diff % 3600000) / 60000);
         const seconds = Math.floor((diff % 60000) / 1000);
-        
+
         if (hours > 0) {
-          setTimeRemaining(`${hours}h ${minutes}m ${seconds}s remaining`);
+          setTimeRemaining(`${hours}h ${minutes}m ${seconds}s`);
         } else {
-          setTimeRemaining(`${minutes}m ${seconds}s remaining`);
+          setTimeRemaining(`${minutes}m ${seconds}s`);
         }
       }
     }, 1000);
@@ -257,7 +247,7 @@ const QuizGame = () => {
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, { notificationOptIn: true });
-      addToast("You'll be notified about new quizzes!", "success");
+      addToast("Copy, we'll radio you for every race", "success");
     } catch (e) {
       console.error("Error saving notification preference:", e);
     }
@@ -280,10 +270,10 @@ const QuizGame = () => {
         createdAt: Timestamp.now(),
       });
       setReminderSet(true);
-      addToast("Reminder set! We'll nudge you before it closes.", "success");
+      addToast("Slow button on. We'll radio you.", "success");
     } catch (e) {
       console.error("Error setting reminder:", e);
-      addToast("Couldn't set reminder. Try again.", "error");
+      addToast("Lost comms. Try again.", "error");
     }
   };
 
@@ -306,14 +296,12 @@ const QuizGame = () => {
 
       await setDoc(doc(db, "quizAnswers", answersDocId), answersData);
 
-      // Hold the overlay for dramatic effect
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       setSubmitted(true);
       setShowChecking(false);
-      addToast("Predictions locked in!", "success", 3000);
+      addToast("Copy, we are checking", "success", 3000);
 
-      // Check if this is the user's first quiz — show notification opt-in
       try {
         const userAnswersQuery = query(
           collection(db, "quizAnswers"),
@@ -324,54 +312,78 @@ const QuizGame = () => {
           setShowNotifPrompt(true);
         }
       } catch (e) {
-        // Silently ignore — non-critical
+        // Non-critical
       }
     } catch (error) {
       console.error("Error submitting answers:", error);
       setShowChecking(false);
-      addToast("Failed to submit. Please try again.", "error", 5000);
+      addToast("No radio. Try again.", "error", 5000);
     }
   };
 
-  // Handle when authentication is loading or user not authenticated
+  // Auth loading state
   if (authLoading) {
     return (
-      <div className="max-w-md mx-auto my-8 p-6 bg-white rounded shadow text-center">
-        <p>Checking authentication...</p>
+      <div className="loading">
+        <div className="loading-spinner"></div>
       </div>
     );
   }
 
   if (!user) {
-    return null; // Will redirect in useEffect
+    return null;
   }
 
   if (loading) {
     return (
-      <div className="max-w-md mx-auto my-8 p-6 bg-white rounded shadow text-center">
-        <p>Loading quiz...</p>
+      <div className="loading">
+        <div className="loading-spinner"></div>
       </div>
     );
   }
 
-  if (error) {
+  if (error || !currentQuiz) {
     return (
-      <div className="max-w-md mx-auto my-8 p-6 bg-white rounded shadow text-center text-red-500">
-        <p>{error}</p>
-      </div>
-    );
-  }
-
-  if (!currentQuiz) {
-    return (
-      <div className="max-w-md mx-auto my-8 p-6 bg-white rounded shadow text-center">
-        <p>No quiz available. Please try again later.</p>
+      <div className="card" style={{ textAlign: "center", padding: "48px 24px" }}>
+        <div className="transmission-bar">
+          <div className="transmission-bar-closed" />
+        </div>
+        <div style={{ fontSize: "48px", marginBottom: "16px", opacity: 0.6 }}>
+          &#x1F3CE;
+        </div>
+        <h2 className="card-title" style={{ marginBottom: "8px" }}>
+          Radio silence
+        </h2>
+        <p className="text-secondary" style={{ marginBottom: "24px" }}>
+          No active transmissions. Stand by for the next race weekend.
+        </p>
+        {nextRace && (
+          <div className="next-race-banner">
+            <div className="next-race-info">
+              <span className="next-race-label">Next Race Weekend</span>
+              <span className="next-race-name">{nextRace.name}</span>
+              <span className="next-race-location">{nextRace.location}</span>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div className="next-race-countdown">
+                {getDaysUntil(nextRace.date)}
+              </div>
+              <div className="next-race-countdown-label">days away</div>
+            </div>
+          </div>
+        )}
+        <button onClick={() => navigate("/")} className="btn" style={{ marginTop: "16px" }}>
+          Back to Pit Wall
+        </button>
       </div>
     );
   }
 
   return (
     <div className="card">
+      <div className="transmission-bar">
+        <div className={quizClosed ? "transmission-bar-closed" : "transmission-bar-live"} />
+      </div>
       {nextRace && (
         <div className="next-race-banner">
           <div className="next-race-info">
@@ -387,22 +399,25 @@ const QuizGame = () => {
           </div>
         </div>
       )}
+
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <h1 className="card-title">{currentQuiz.title}</h1>
-          <div className="timer">
-            {quizClosed ? (
-              <span style={{ color: 'var(--wc-red)' }}>{timeRemaining}</span>
-            ) : (
-              <span>{timeRemaining}</span>
-            )}
+          <h1 className="card-title" style={{ marginBottom: 0 }}>{currentQuiz.title}</h1>
+          <div className="flex items-center gap-2">
+            <div className="timer">
+              <span style={quizClosed ? { color: 'var(--wc-red)' } : undefined}>
+                {timeRemaining}
+              </span>
+            </div>
+            <span className={`live-badge ${quizClosed ? 'live-badge-closed' : 'live-badge-active'}`}>
+              {quizClosed ? 'Closed' : 'Live'}
+            </span>
           </div>
         </div>
 
         {userProfile && (
-          <div className="text-sm text-gray-600">
-            Playing as:{" "}
-            <span className="font-medium">{userProfile.username}</span>
+          <div className="text-sm text-secondary">
+            <span className="font-semibold">{userProfile.username}</span>, do you copy?
           </div>
         )}
       </div>
@@ -415,13 +430,13 @@ const QuizGame = () => {
                 {index + 1}. {question.text}
               </p>
               <div className="options-list">
-                <div className="flex space-x-4">
+                <div className="flex gap-3">
                   {question.options.map((option) => (
                     <div key={option} className="option-item flex-1">
                       <label
                         className={`option-label ${
                           answers[question.id] === option
-                            ? "bg-blue-50 border-l-4 border-l-[var(--wc-red)]"
+                            ? "option-selected"
                             : ""
                         }`}
                       >
@@ -444,66 +459,69 @@ const QuizGame = () => {
             </div>
           ))}
 
-          <button
-            onClick={handleSubmit}
-            disabled={showChecking}
-            className={`btn btn-block ${showChecking ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            {submitted ? "Update Answers" : "Submit Answers"}
-          </button>
-          
-          {submitted && !showChecking && (
-            <div className="alert alert-success" style={{ marginTop: '16px' }}>
-              Predictions submitted. You can still edit until the quiz closes.
-            </div>
-          )}
-
-          {!submitted && !reminderSet && (
+          {/* Stable action area — all conditional buttons live here */}
+          <div className="quiz-actions">
             <button
-              onClick={handleRemindMe}
-              className="btn btn-secondary btn-block"
-              style={{ marginTop: '12px' }}
+              onClick={handleSubmit}
+              disabled={showChecking}
+              className="btn btn-block"
             >
-              Remind me before it closes
+              {submitted ? "Change Predictions" : "Lock In Predictions"}
             </button>
-          )}
 
-          {reminderSet && (
-            <div className="alert alert-success" style={{ marginTop: '12px' }}>
-              Reminder set for 2 hours before deadline.
-            </div>
-          )}
+            {submitted && !showChecking && (
+              <div className="alert alert-success" style={{ margin: 0 }}>
+                Copy. You can change predictions until the chequered flag.
+              </div>
+            )}
 
-          {showNotifPrompt && (
-            <div className="notif-prompt">
-              <div className="notif-prompt-title">
-                Want to know when results are in?
+            {!submitted && !reminderSet && (
+              <button
+                onClick={handleRemindMe}
+                className="btn btn-secondary btn-block"
+              >
+                Slow Button On
+              </button>
+            )}
+
+            {reminderSet && (
+              <div className="alert alert-success" style={{ margin: 0 }}>
+                Slow button on. 2 hours before the flag.
               </div>
-              <div className="notif-prompt-text">
-                Get notified when new quizzes drop and when your scores are ready.
+            )}
+
+            {showNotifPrompt && (
+              <div className="notif-prompt">
+                <div className="notif-prompt-title">
+                  Want to know when results are in?
+                </div>
+                <div className="notif-prompt-text">
+                  Get notified when new quizzes drop and when your scores are ready.
+                </div>
+                <div className="notif-prompt-actions">
+                  <button className="btn btn-accent" onClick={handleNotifOptIn}>
+                    Copy, Notify Me
+                  </button>
+                  <button className="btn btn-secondary" onClick={handleNotifDismiss}>
+                    Not now
+                  </button>
+                </div>
               </div>
-              <div className="notif-prompt-actions">
-                <button className="btn btn-accent" onClick={handleNotifOptIn}>
-                  Yes, notify me
-                </button>
-                <button className="btn btn-secondary" onClick={handleNotifDismiss}>
-                  Not now
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </>
       ) : (
         <div className="results">
-          <div className="text-2xl font-bold mb-4">
+          <div className="text-2xl font-bold mb-4 text-center">
             Your answers have been submitted
           </div>
-          
+
           {quizClosed && (
-            <div className="score mb-4">
+            <div className="score">
               {score} / {currentQuiz.questions.length}
             </div>
           )}
+
           <div className="space-y-4">
             {currentQuiz.questions.map((question, index) => (
               <div key={question.id} className="question-container">
@@ -511,23 +529,23 @@ const QuizGame = () => {
                   {index + 1}. {question.text}
                 </p>
                 <p className="mt-2">
-                  Your answer:
-                  <span className="ml-1 font-medium">
+                  Your answer:{" "}
+                  <span className="font-semibold">
                     {answers[question.id] || "Not answered"}
                   </span>
                 </p>
                 {question.correctAnswer ? (
-                  <p style={{ color: "var(--wc-red)" }} className="font-medium mt-1">
+                  <p className="text-red font-semibold mt-1">
                     Correct answer: {question.correctAnswer}
                   </p>
                 ) : quizClosed ? (
-                  <p className="text-gray-500 font-medium mt-1">
+                  <p className="text-secondary font-medium mt-1">
                     The correct answer will be revealed by the administrator
                   </p>
                 ) : null}
                 {distribution[question.id] && distribution[question.id].total > 0 && (
-                  <div style={{ marginTop: '8px' }}>
-                    <div className="text-xs text-gray-500" style={{ marginBottom: '4px' }}>
+                  <div className="mt-2">
+                    <div className="text-xs text-secondary mb-1">
                       Community predictions ({distribution[question.id].total} votes)
                     </div>
                     <div className="distribution-bar">
@@ -557,10 +575,11 @@ const QuizGame = () => {
           </div>
         </div>
       )}
+
       {showChecking && (
         <CheckingOverlay
           message="We are checking..."
-          subtext="Submitting your predictions"
+          subtext="Stand by for confirmation"
         />
       )}
     </div>

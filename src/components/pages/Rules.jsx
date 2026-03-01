@@ -1,41 +1,82 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Rules = () => {
   return (
     <div className="card">
-      <h1 className="card-title">Quiz Rules</h1>
-      
-      <div className="rules-container">
-        <div className="rule-section">
-          <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--wc-red)' }}>How to Play</h2>
-          <p className="mb-4">
-            Before each race, you'll receive three Yes/No questions about the approaching race.
-          </p>
-          <p className="mb-4">
-            You must select either "Yes" or "No" for each question before the quiz deadline.
-          </p>
-          <p className="mb-4">
-            After the race, the answers are evaluated and you receive +1 point for each correct answer.
-          </p>
-          <p className="mb-4">
-            The player with the most accumulated points across all quizzes wins the championship!
-          </p>
-        </div>
+      <h1 className="card-title">Race Briefing</h1>
 
-        <div className="rule-section mt-8">
-          <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--wc-red)' }}>Tips</h2>
-          <ul className="list-disc pl-5 space-y-2">
-            <li>You can edit your answers any time before the quiz deadline</li>
-            <li>The leaderboard updates after each race once the quiz is scored</li>
-            <li>Stay informed about F1 news to increase your chances of correct predictions</li>
-            <li>Check back regularly for new quizzes before each race weekend</li>
-          </ul>
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Predict
         </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          Before each race weekend, a quiz goes live with Yes/No prediction questions about the upcoming race.
+          Answer every question before the deadline — the countdown timer shows exactly how much time you have left.
+        </p>
+      </div>
 
-        <div className="mt-8 p-4 bg-gray-100 rounded-md">
-          <h2 className="text-lg font-bold mb-2">Remember:</h2>
-          <p>The person with the most points wins the quiz!</p>
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Score
         </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          After the race, the admin evaluates each question.
+          You earn <span className="text-gold font-bold">+1 point</span> for every correct prediction.
+          Once scored, you can see how the community voted on each question.
+        </p>
+      </div>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Win
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          Points accumulate across every race of the season.
+          The player with the most points at the end of the season wins the championship.
+        </p>
+      </div>
+
+      <h2 className="card-title" style={{ margin: "32px 0 16px", fontSize: "16px" }}>
+        Good to Know
+      </h2>
+
+      <div className="flex flex-col gap-3">
+        {[
+          { title: "Edit anytime", desc: "Change your answers as many times as you want before the deadline." },
+          { title: "Auto-submit", desc: "When the deadline hits, your current answers are submitted automatically." },
+          { title: "Reminders", desc: "Set a reminder to get nudged 2 hours before the quiz closes." },
+        ].map((tip) => (
+          <div key={tip.title} className="tip-row">
+            <span className="text-gold font-bold">{tip.title}</span>
+            <span className="text-secondary text-sm">{tip.desc}</span>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="card-title" style={{ margin: "32px 0 16px", fontSize: "16px" }}>
+        Explore
+      </h2>
+
+      <div className="dashboard-stats">
+        <Link to="/rankings">
+          <div className="stat-card" style={{ cursor: "pointer" }}>
+            <div className="stat-value" style={{ fontSize: "22px" }}>Rankings</div>
+            <div className="stat-label">Season standings</div>
+          </div>
+        </Link>
+        <Link to="/dashboard">
+          <div className="stat-card" style={{ cursor: "pointer" }}>
+            <div className="stat-value" style={{ fontSize: "22px" }}>Dashboard</div>
+            <div className="stat-label">Your stats</div>
+          </div>
+        </Link>
+        <Link to="/head-to-head">
+          <div className="stat-card" style={{ cursor: "pointer" }}>
+            <div className="stat-value" style={{ fontSize: "22px" }}>H2H</div>
+            <div className="stat-label">Compare with friends</div>
+          </div>
+        </Link>
       </div>
     </div>
   );

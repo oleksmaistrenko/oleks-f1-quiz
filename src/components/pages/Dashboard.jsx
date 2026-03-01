@@ -104,7 +104,7 @@ const Dashboard = () => {
 
   return (
     <div className="card">
-      <h1 className="card-title">Your Dashboard</h1>
+      <h1 className="card-title">Pit Wall</h1>
 
       <div className="dashboard-stats">
         <div className="stat-card">
@@ -123,10 +123,7 @@ const Dashboard = () => {
 
       {stats.quizScores.length > 0 && (
         <>
-          <h2
-            className="font-bold mb-4"
-            style={{ fontSize: "16px", textTransform: "uppercase" }}
-          >
+          <h2 className="card-title" style={{ fontSize: "16px" }}>
             Season Progress
           </h2>
           <div className="sparkline" style={{ marginBottom: "32px" }}>
@@ -149,14 +146,7 @@ const Dashboard = () => {
             ))}
           </div>
 
-          <h2
-            className="font-bold mb-4"
-            style={{
-              fontSize: "16px",
-              textTransform: "uppercase",
-              marginTop: "16px",
-            }}
-          >
+          <h2 className="card-title" style={{ fontSize: "16px", marginTop: "16px" }}>
             Quiz History
           </h2>
           {stats.quizScores
@@ -180,7 +170,7 @@ const Dashboard = () => {
 
       {stats.quizScores.length === 0 && (
         <p className="text-gray-500">
-          No quiz results yet. Play your first quiz to see your stats!
+          No data yet. Complete your first race to see telemetry.
         </p>
       )}
     </div>

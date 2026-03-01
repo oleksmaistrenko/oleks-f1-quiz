@@ -157,7 +157,7 @@ const HeadToHead = () => {
           value={player1Id}
           onChange={(e) => setPlayer1Id(e.target.value)}
         >
-          <option value="">Select player</option>
+          <option value="">Select driver</option>
           {allUsers.map((u) => (
             <option key={u.id} value={u.id}>
               {u.username}{u.id === user?.uid ? " (you)" : ""}
@@ -288,10 +288,10 @@ const HeadToHead = () => {
         </>
       ) : comparison ? (
         <p className="text-gray-500">
-          No shared quizzes found between these players.
+          No shared races between these drivers.
         </p>
       ) : (
-        <p className="text-gray-500">Select two players to compare.</p>
+        <p className="text-gray-500">Select two drivers to compare.</p>
       )}
     </div>
   );

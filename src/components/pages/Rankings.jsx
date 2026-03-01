@@ -10,29 +10,23 @@ const Rankings = () => {
   const [rankingsData, setRankingsData] = useState({
     users: [],
     quizzes: [],
-    scores: {}, // format: { userId_quizId: score }
-    submissions: {}, // format: { userId_quizId: true } - tracks who has submitted, even without scores
-    totalScores: {}, // format: { userId: totalScore }
+    scores: {},
+    submissions: {},
+    totalScores: {},
   });
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  // Check for authentication
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
 
       if (!currentUser) {
-        // Redirect to login if not authenticated
         navigate("/login");
       } else {
-        // Get user profile to check if admin
         try {
           const userDocRef = doc(db, "users", currentUser.uid);
-          const userDocSnapshot = await getDoc(userDocRef);
-          if (userDocSnapshot.exists()) {
-            // User profile loaded
-          }
+          await getDoc(userDocRef);
         } catch (err) {
           // Error fetching user profile
         }
@@ -42,7 +36,6 @@ const Rankings = () => {
     return () => unsubscribe();
   }, [navigate]);
 
-  // Real-time rankings listener
   useEffect(() => {
     if (!user) return;
 
@@ -130,11 +123,7 @@ const Rankings = () => {
   }
 
   if (error) {
-    return (
-      <div className="alert alert-error">
-        {error}
-      </div>
-    );
+    return <div className="alert alert-error">{error}</div>;
   }
 
   const { users, quizzes, scores, submissions, totalScores } = rankingsData;
@@ -159,51 +148,44 @@ const Rankings = () => {
     return null;
   };
 
-  // Get the score or status for a specific user and quiz
   const getScore = (userId, quizId) => {
     const key = `${userId}_${quizId}`;
-    
-    // If there's a score, return it
+
     if (scores[key] !== undefined) {
       return scores[key];
     }
-    
-    // Check if the user has submitted an answer but doesn't have a score yet
+
     const hasSubmitted = submissions[key];
-    
-    // Return a check mark if they've submitted but don't have a score
-    return hasSubmitted ? "✅" : "-";
+    return hasSubmitted ? "\u2705" : "\u2014";
   };
 
   return (
     <div className="card">
-      <h1 className="card-title">Leaderboard</h1>
-      
+      <h1 className="card-title">Championship Standings</h1>
+
       {users.length === 0 ? (
-        <p>No quiz results available yet.</p>
+        <p className="text-secondary">No telemetry available yet.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+        <div className="rankings-table-wrap">
+          <table>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2 text-left" style={{ backgroundColor: 'var(--wc-carbon)', color: 'var(--wc-text)' }}>Rank</th>
-                <th className="border p-2 text-left" style={{ backgroundColor: 'var(--wc-carbon)', color: 'var(--wc-text)' }}>Player</th>
-                <th className="border p-2 text-left" style={{ backgroundColor: 'var(--wc-carbon)', color: 'var(--wc-text)' }}>Total Points</th>
-                
-                {/* Quiz columns */}
+              <tr>
+                <th>#</th>
+                <th>Driver</th>
+                <th>Total</th>
                 {quizzes.map(quiz => (
-                  <th key={quiz.id} className="border p-2 text-left" style={{ backgroundColor: 'var(--wc-carbon)', color: 'var(--wc-text)' }}>
-                    {quiz.title}
-                  </th>
+                  <th key={quiz.id}>{quiz.title}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {users.map((user, index) => (
-                <tr key={user.id} className={index % 2 === 0 ? "bg-gray-50" : ""}>
-                  <td className="border p-2">{index + 1}</td>
-                  <td className="border p-2 font-medium">
-                    {user.username}
+              {users.map((u, index) => (
+                <tr key={u.id}>
+                  <td className="font-semibold" style={{ width: "40px" }}>
+                    {index + 1}
+                  </td>
+                  <td className="font-medium" style={{ whiteSpace: "nowrap" }}>
+                    {u.username}
                     {(() => {
                       const title = getRankTitle(index + 1, users.length);
                       return title ? (
@@ -211,14 +193,15 @@ const Rankings = () => {
                       ) : null;
                     })()}
                   </td>
-                  <td className="border p-2 font-bold" style={{ color: 'var(--wc-red)' }}>
-                    {totalScores[user.id] || 0}
+                  <td className="font-bold" style={{ color: "var(--wc-red)", fontFamily: "'JetBrains Mono', monospace" }}>
+                    {totalScores[u.id] || 0}
                   </td>
-                  
-                  {/* Scores for each quiz */}
                   {quizzes.map(quiz => (
-                    <td key={`${user.id}_${quiz.id}`} className="border p-2 text-center">
-                      {getScore(user.id, quiz.id)}
+                    <td
+                      key={`${u.id}_${quiz.id}`}
+                      style={{ textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}
+                    >
+                      {getScore(u.id, quiz.id)}
                     </td>
                   ))}
                 </tr>
