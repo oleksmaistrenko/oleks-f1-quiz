@@ -1,0 +1,112 @@
+import React from "react";
+import { Link } from "react-router-dom";
+
+const Terms = () => {
+  return (
+    <div className="card">
+      <h1 className="card-title">Terms of Service</h1>
+      <p className="text-secondary text-sm" style={{ marginBottom: "24px" }}>
+        Last updated: March 1, 2026
+      </p>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Acceptance of Terms
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          By accessing or using we-check.ing, you agree to be bound by these Terms of Service. If you do not agree, do not use the service.
+        </p>
+      </div>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Eligibility
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          You must be at least 13 years old to use we-check.ing. By creating an account, you confirm that you meet this age requirement.
+        </p>
+      </div>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Accounts
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          You may create one account per person. You are responsible for keeping your login credentials secure and for all activity under your account. We reserve the right to remove accounts that violate these terms.
+        </p>
+      </div>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Quiz Gameplay
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          Quizzes are created and scored at the discretion of the site administrators. We do not guarantee the availability, accuracy, or regularity of quizzes. Points and rankings are for entertainment purposes only and carry no monetary value.
+        </p>
+      </div>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Not Affiliated with Formula 1
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          we-check.ing is an unofficial fan project and is not affiliated with, endorsed by, or connected to Formula 1, the FIA, Formula One Management, or any Formula 1 team. F1, FORMULA ONE, and related marks are trademarks of Formula One Licensing B.V.
+        </p>
+      </div>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Intellectual Property
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          The we-check.ing name, design, and original content are owned by the site operator. All Formula 1-related trademarks belong to their respective owners. You may not reproduce or redistribute any part of this service without permission.
+        </p>
+      </div>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Termination
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          We may suspend or terminate your account at any time, with or without cause, including for violation of these terms. Upon termination, your right to use the service ceases immediately.
+        </p>
+      </div>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Limitation of Liability
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          we-check.ing is provided "as is" without warranties of any kind. We are not liable for any damages arising from your use of the service, including loss of data or interruption of service.
+        </p>
+      </div>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Changes to These Terms
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          We may update these terms from time to time. Continued use of the service after changes constitutes acceptance of the updated terms. We encourage you to review this page periodically.
+        </p>
+      </div>
+
+      <div className="question-container">
+        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+          Contact
+        </div>
+        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
+          If you have questions about these terms, contact us at{" "}
+          <a href="mailto:hello@we-check.ing" className="text-red">hello@we-check.ing</a>.
+        </p>
+      </div>
+
+      <div style={{ marginTop: "24px", textAlign: "center" }}>
+        <Link to="/privacy" className="text-red" style={{ fontWeight: 600, fontSize: "14px" }}>
+          View Privacy Policy →
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+export default Terms;
