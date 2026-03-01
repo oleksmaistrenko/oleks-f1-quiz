@@ -48,6 +48,7 @@ export const registerWithEmail = async (email, password, username) => {
     email: email,
     username: username,
     createdAt: new Date(),
+    termsAcceptedAt: new Date(),
     role: isFirstUser ? "admin" : "user" // First user gets admin role
   });
 
