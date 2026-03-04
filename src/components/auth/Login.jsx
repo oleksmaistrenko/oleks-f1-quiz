@@ -112,6 +112,12 @@ const Login = () => {
             Sometimes you know. Most times you don't. Like the sport itself.
           </p>
         </div>
+        <div className="pitch-card">
+          <h3 className="pitch-title">"We are checking"</h3>
+          <p className="pitch-text">
+            The most honest answer in F1. Here, everyone's an engineer — and nobody has the data.
+          </p>
+        </div>
       </section>
 
       {/* Testimonial */}
@@ -192,7 +198,7 @@ const Login = () => {
                 onChange={(e) => setTermsAccepted(e.target.checked)}
                 style={{ marginTop: "3px", accentColor: "var(--wc-red)" }}
               />
-              <label htmlFor="terms" className="text-secondary" style={{ fontSize: "13px", lineHeight: "1.5", cursor: "pointer" }}>
+              <label htmlFor="terms" className="text-secondary text-sm" style={{ lineHeight: "1.5", cursor: "pointer" }}>
                 I agree to the{" "}
                 <Link to="/terms" className="text-red" target="_blank" rel="noopener noreferrer">Terms of Service</Link>
                 {" "}and{" "}

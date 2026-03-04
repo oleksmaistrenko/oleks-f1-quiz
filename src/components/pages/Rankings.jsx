@@ -15,6 +15,7 @@ const Rankings = () => {
     totalScores: {},
   });
   const [user, setUser] = useState(null);
+  const [showRaceColumns, setShowRaceColumns] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -159,6 +160,9 @@ const Rankings = () => {
     return hasSubmitted ? "\u2705" : "\u2014";
   };
 
+  const truncateTitle = (title, max) =>
+    title.length > max ? title.slice(0, max) + "…" : title;
+
   return (
     <div className="card">
       <h1 className="card-title">Championship Standings</h1>
@@ -166,49 +170,66 @@ const Rankings = () => {
       {users.length === 0 ? (
         <p className="text-secondary">No telemetry available yet.</p>
       ) : (
-        <div className="rankings-table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Driver</th>
-                <th>Total</th>
-                {quizzes.map(quiz => (
-                  <th key={quiz.id}>{quiz.title}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u, index) => (
-                <tr key={u.id}>
-                  <td className="font-semibold" style={{ width: "40px" }}>
-                    {index + 1}
-                  </td>
-                  <td className="font-medium" style={{ whiteSpace: "nowrap" }}>
-                    {u.username}
-                    {(() => {
-                      const title = getRankTitle(index + 1, users.length);
-                      return title ? (
-                        <span className={`rank-title ${title.className}`}>{title.label}</span>
-                      ) : null;
-                    })()}
-                  </td>
-                  <td className="font-bold" style={{ color: "var(--wc-red)", fontFamily: "'JetBrains Mono', monospace" }}>
-                    {totalScores[u.id] || 0}
-                  </td>
-                  {quizzes.map(quiz => (
-                    <td
-                      key={`${u.id}_${quiz.id}`}
-                      style={{ textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}
-                    >
-                      {getScore(u.id, quiz.id)}
-                    </td>
+        <>
+          <div className="rankings-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th className="rankings-col-rank">#</th>
+                  <th className="rankings-col-driver">Driver</th>
+                  <th className="rankings-col-total">Total</th>
+                  {showRaceColumns && quizzes.map(quiz => (
+                    <th key={quiz.id} className="rankings-col-race" title={quiz.title}>
+                      {truncateTitle(quiz.title, 12)}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {users.map((u, index) => (
+                  <tr key={u.id}>
+                    <td className="font-semibold rankings-col-rank">
+                      {index + 1}
+                    </td>
+                    <td className="font-medium rankings-col-driver">
+                      {u.username}
+                      {(() => {
+                        const title = getRankTitle(index + 1, users.length);
+                        return title ? (
+                          <span className={`rank-title ${title.className}`}>{title.label}</span>
+                        ) : null;
+                      })()}
+                    </td>
+                    <td className="font-bold rankings-col-total" style={{ color: "var(--wc-red)", fontFamily: "'JetBrains Mono', monospace" }}>
+                      {totalScores[u.id] || 0}
+                    </td>
+                    {showRaceColumns && quizzes.map(quiz => (
+                      <td
+                        key={`${u.id}_${quiz.id}`}
+                        className="rankings-col-race"
+                        style={{ textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}
+                      >
+                        {getScore(u.id, quiz.id)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {quizzes.length > 0 && (
+            <button
+              className="btn btn-secondary btn-block"
+              style={{ marginTop: "16px" }}
+              onClick={() => setShowRaceColumns(!showRaceColumns)}
+            >
+              {showRaceColumns
+                ? "Hide Race Breakdown"
+                : `Show Race Breakdown (${quizzes.length} rounds)`}
+            </button>
+          )}
+        </>
       )}
     </div>
   );

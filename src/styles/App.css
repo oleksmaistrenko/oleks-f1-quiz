@@ -36,13 +36,17 @@
 }
 
 @media (max-width: 767px) {
+    .header {
+        min-height: auto;
+    }
+
     .header .container {
         padding: 0 16px;
     }
 }
 
 .header-title {
-    font-size: 22px;
+    font-size: var(--fs-2xl);
     font-weight: 800;
     letter-spacing: 0.5px;
     color: var(--wc-text);
@@ -62,7 +66,7 @@
     text-decoration: none;
     font-weight: 600;
     text-transform: uppercase;
-    font-size: 13px;
+    font-size: var(--fs-sm);
     letter-spacing: 0.8px;
     transition: color var(--duration-fast);
     white-space: nowrap;
@@ -105,13 +109,13 @@
 }
 
 .header-username {
-    font-size: 13px;
+    font-size: var(--fs-sm);
     color: var(--wc-text-secondary);
     font-weight: 500;
 }
 
 .header-admin-badge {
-    font-size: 10px;
+    font-size: var(--fs-micro);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -175,7 +179,7 @@
 }
 
 .card-title {
-    font-size: 20px;
+    font-size: var(--fs-xl);
     font-weight: 700;
     margin-bottom: var(--space-md);
     color: var(--wc-text);
@@ -185,12 +189,12 @@
 
 /* ── Buttons ───────────────────────────────── */
 button {
-    font-family: "Outfit", sans-serif;
+    font-family: inherit;
     border: none;
     border-radius: var(--radius-sm);
     padding: 10px 20px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: var(--fs-body);
     cursor: pointer;
     transition:
         background-color var(--duration-fast),
@@ -218,7 +222,7 @@ button:disabled {
     color: var(--wc-text);
     padding: 10px 20px;
     border-radius: var(--radius-sm);
-    font-size: 14px;
+    font-size: var(--fs-body);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -263,7 +267,7 @@ button:disabled {
 
 .btn-small {
     padding: 6px 14px;
-    font-size: 12px;
+    font-size: var(--fs-xs);
 }
 
 .btn-block {
@@ -298,7 +302,7 @@ button.bg-green-500:hover {
 .form-label {
     display: block;
     font-weight: 600;
-    font-size: 14px;
+    font-size: var(--fs-body);
     margin-bottom: 8px;
     color: var(--wc-text);
     text-transform: uppercase;
@@ -337,7 +341,7 @@ button.bg-green-500:hover {
     margin-bottom: 16px;
     border-radius: var(--radius-sm);
     font-weight: 500;
-    font-size: 14px;
+    font-size: var(--fs-body);
     border-left: 3px solid transparent;
 }
 
@@ -381,7 +385,7 @@ button.bg-green-500:hover {
 }
 
 .quiz-title {
-    font-size: 18px;
+    font-size: var(--fs-lg);
     font-weight: 600;
     margin-bottom: 8px;
 }
@@ -389,7 +393,7 @@ button.bg-green-500:hover {
 .quiz-meta {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--wc-text-secondary);
     margin-bottom: 12px;
 }
@@ -410,7 +414,7 @@ button.bg-green-500:hover {
 
 .question-text {
     font-weight: 600;
-    font-size: 16px;
+    font-size: var(--fs-md);
     margin-bottom: 14px;
     line-height: 1.4;
 }
@@ -468,6 +472,34 @@ button.bg-green-500:hover {
     accent-color: var(--wc-red);
 }
 
+/* Quiz header — title + timer row */
+.quiz-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.quiz-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 520px) {
+    .quiz-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .quiz-header-meta {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
 /* Quiz actions area — stable height, no layout shifts */
 .quiz-actions {
     margin-top: var(--space-lg);
@@ -514,7 +546,7 @@ button.bg-green-500:hover {
     padding: 6px 14px;
     border-radius: var(--radius-sm);
     font-weight: 600;
-    font-size: 13px;
+    font-size: var(--fs-sm);
     font-family: "JetBrains Mono", monospace;
     border: 1px solid var(--wc-border);
     white-space: nowrap;
@@ -530,7 +562,7 @@ button.bg-green-500:hover {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 11px;
+    font-size: var(--fs-micro);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -582,7 +614,7 @@ button.bg-green-500:hover {
 }
 
 .score {
-    font-size: 48px;
+    font-size: var(--fs-hero);
     font-weight: 800;
     font-family: "JetBrains Mono", monospace;
     color: var(--wc-red);
@@ -591,7 +623,7 @@ button.bg-green-500:hover {
 }
 
 .feedback {
-    font-size: 18px;
+    font-size: var(--fs-lg);
     margin-bottom: 24px;
 }
 
@@ -618,7 +650,7 @@ button.bg-green-500:hover {
 }
 
 .stat-value {
-    font-size: 36px;
+    font-size: var(--fs-5xl);
     font-weight: 800;
     font-family: "JetBrains Mono", monospace;
     color: var(--wc-red);
@@ -626,7 +658,7 @@ button.bg-green-500:hover {
 }
 
 .stat-label {
-    font-size: 11px;
+    font-size: var(--fs-micro);
     color: var(--wc-text-secondary);
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -635,12 +667,27 @@ button.bg-green-500:hover {
 }
 
 /* Sparkline chart */
+.sparkline-scroll-wrap {
+    overflow-x: auto;
+    margin: 0 -4px;
+    padding: 0 4px;
+}
+
+.sparkline-scroll-wrap::-webkit-scrollbar {
+    height: 4px;
+}
+
+.sparkline-scroll-wrap::-webkit-scrollbar-thumb {
+    background: var(--wc-border);
+    border-radius: 2px;
+}
+
 .sparkline {
     display: flex;
     align-items: flex-end;
     gap: 6px;
     height: 120px;
-    padding: 8px 0;
+    padding: 24px 0 8px;
 }
 
 .sparkline-bar {
@@ -661,7 +708,7 @@ button.bg-green-500:hover {
     bottom: -22px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 10px;
+    font-size: var(--fs-micro);
     color: var(--wc-text-muted);
     white-space: nowrap;
 }
@@ -671,7 +718,7 @@ button.bg-green-500:hover {
     top: -20px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 12px;
+    font-size: var(--fs-xs);
     font-weight: 700;
     font-family: "JetBrains Mono", monospace;
     color: var(--wc-text);
@@ -694,7 +741,7 @@ button.bg-green-500:hover {
     font-family: "JetBrains Mono", monospace;
     font-weight: 700;
     color: var(--wc-red);
-    font-size: 15px;
+    font-size: var(--fs-body);
 }
 
 /* ── Rankings / Leaderboard ────────────────── */
@@ -707,13 +754,13 @@ button.bg-green-500:hover {
 .rankings-table-wrap table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .rankings-table-wrap th {
     background-color: var(--wc-carbon);
     color: var(--wc-text-secondary);
-    font-size: 11px;
+    font-size: var(--fs-micro);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -741,9 +788,42 @@ button.bg-green-500:hover {
     border-bottom: none;
 }
 
+/* Rankings column classes */
+.rankings-col-rank {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    min-width: 36px;
+    width: 36px;
+    background-color: var(--wc-surface);
+}
+
+.rankings-col-driver {
+    white-space: nowrap;
+}
+
+.rankings-col-total {
+    font-variant-numeric: tabular-nums;
+}
+
+thead .rankings-col-rank {
+    background-color: var(--wc-carbon);
+    z-index: 3;
+}
+
+tbody tr:hover .rankings-col-rank {
+    background-color: var(--wc-surface-hover);
+}
+
+.rankings-col-race {
+    min-width: 56px;
+    white-space: nowrap;
+    font-size: var(--fs-sm);
+}
+
 /* Rank titles (badges) */
 .rank-title {
-    font-size: 10px;
+    font-size: var(--fs-micro);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -783,19 +863,23 @@ button.bg-green-500:hover {
 }
 
 .h2h-selector select {
-    padding: 10px 16px;
+    padding: 10px 36px 10px 16px;
     border: 2px solid var(--wc-border);
     border-radius: var(--radius-md);
     background-color: var(--wc-bg);
     color: var(--wc-text);
     font-family: "Outfit", sans-serif;
-    font-size: 14px;
+    font-size: var(--fs-body);
     flex: 1;
     min-width: 140px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%237E7E98' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
 }
 
 .h2h-vs {
-    font-size: 18px;
+    font-size: var(--fs-lg);
     font-weight: 800;
     color: var(--wc-red);
     text-transform: uppercase;
@@ -819,19 +903,19 @@ button.bg-green-500:hover {
 
 .h2h-player-name {
     font-weight: 700;
-    font-size: 16px;
+    font-size: var(--fs-md);
     margin-bottom: 8px;
 }
 
 .h2h-stat {
-    font-size: 32px;
+    font-size: var(--fs-4xl);
     font-weight: 800;
     font-family: "JetBrains Mono", monospace;
     line-height: 1;
 }
 
 .h2h-stat-label {
-    font-size: 11px;
+    font-size: var(--fs-micro);
     color: var(--wc-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -859,12 +943,109 @@ button.bg-green-500:hover {
     border-bottom: none;
 }
 
+/* Compact race-by-race scoreboard */
+.h2h-races {
+    border: 1px solid var(--wc-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.h2h-races-header {
+    display: grid;
+    grid-template-columns: 60px 1fr 60px;
+    gap: 8px;
+    padding: 10px 16px;
+    background-color: var(--wc-carbon);
+    border-bottom: 2px solid var(--wc-border);
+    font-size: var(--fs-micro);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--wc-text-secondary);
+    text-align: center;
+}
+
+.h2h-races-header > div:nth-child(2) {
+    text-align: center;
+}
+
+.h2h-race-block {
+    border-bottom: 1px solid var(--wc-border);
+}
+
+.h2h-race-block:last-child {
+    border-bottom: none;
+}
+
+.h2h-race-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 60px;
+    gap: 8px;
+    padding: 12px 16px;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color var(--duration-fast);
+}
+
+.h2h-race-row:hover {
+    background-color: var(--wc-surface-hover);
+}
+
+.h2h-race-row-active {
+    background-color: var(--wc-surface);
+}
+
+.h2h-race-score {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+    font-size: var(--fs-md);
+    text-align: center;
+    color: var(--wc-text-secondary);
+}
+
+.h2h-winner {
+    color: var(--wc-success);
+}
+
+.h2h-loser {
+    color: var(--wc-text-muted);
+}
+
+.h2h-race-title {
+    font-weight: 600;
+    font-size: var(--fs-body);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.h2h-race-chevron {
+    font-size: var(--fs-micro);
+    color: var(--wc-text-muted);
+}
+
+.h2h-race-details {
+    background-color: var(--wc-carbon);
+    border-top: 1px solid var(--wc-border);
+    padding: 8px 0;
+}
+
+.h2h-question-text {
+    text-align: center;
+    font-size: var(--fs-sm);
+    color: var(--wc-text-secondary);
+    line-height: 1.4;
+}
+
 .h2h-answer {
     text-align: center;
     padding: 4px 8px;
     border-radius: var(--radius-sm);
     font-weight: 600;
-    font-size: 13px;
+    font-size: var(--fs-sm);
+    word-break: break-word;
 }
 
 .h2h-answer-correct {
@@ -899,7 +1080,7 @@ button.bg-green-500:hover {
     padding: 12px 20px;
     color: var(--wc-text);
     font-weight: 500;
-    font-size: 14px;
+    font-size: var(--fs-body);
     box-shadow: var(--shadow-lg);
     animation: toast-in 0.3s var(--ease-out);
     max-width: 320px;
@@ -920,7 +1101,7 @@ button.bg-green-500:hover {
 
 .toast-prefix {
     color: var(--wc-text-muted);
-    font-size: 10px;
+    font-size: var(--fs-micro);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -1002,7 +1183,7 @@ button.bg-green-500:hover {
 }
 
 .checking-text {
-    font-size: 22px;
+    font-size: var(--fs-2xl);
     font-weight: 700;
     color: var(--wc-text);
     text-transform: uppercase;
@@ -1016,7 +1197,7 @@ button.bg-green-500:hover {
 }
 
 .checking-subtext {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--wc-text-secondary);
     margin-top: 8px;
 }
@@ -1028,7 +1209,7 @@ button.bg-green-500:hover {
     border-radius: var(--radius-sm);
     overflow: hidden;
     margin-top: 8px;
-    font-size: 12px;
+    font-size: var(--fs-xs);
     font-weight: 600;
 }
 
@@ -1069,7 +1250,7 @@ button.bg-green-500:hover {
 }
 
 .next-race-label {
-    font-size: 10px;
+    font-size: var(--fs-micro);
     text-transform: uppercase;
     color: var(--wc-text-muted);
     letter-spacing: 1.5px;
@@ -1077,13 +1258,13 @@ button.bg-green-500:hover {
 }
 
 .next-race-name {
-    font-size: 17px;
+    font-size: var(--fs-lg);
     font-weight: 700;
     margin-top: 2px;
 }
 
 .next-race-location {
-    font-size: 13px;
+    font-size: var(--fs-sm);
     color: var(--wc-text-secondary);
     margin-top: 2px;
 }
@@ -1094,14 +1275,14 @@ button.bg-green-500:hover {
 
 .next-race-countdown {
     font-family: "JetBrains Mono", monospace;
-    font-size: 28px;
+    font-size: var(--fs-3xl);
     font-weight: 700;
     color: var(--wc-gold);
     line-height: 1;
 }
 
 .next-race-countdown-label {
-    font-size: 10px;
+    font-size: var(--fs-micro);
     color: var(--wc-text-muted);
     text-align: right;
     text-transform: uppercase;
@@ -1119,13 +1300,13 @@ button.bg-green-500:hover {
 }
 
 .notif-prompt-title {
-    font-size: 16px;
+    font-size: var(--fs-md);
     font-weight: 700;
     margin-bottom: 6px;
 }
 
 .notif-prompt-text {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--wc-text-secondary);
     margin-bottom: 16px;
 }
@@ -1221,6 +1402,15 @@ button.bg-green-500:hover {
     border-left: 3px solid var(--wc-gold);
 }
 
+/* ── Variant Classes ──────────────────────── */
+.card-title-sm {
+    font-size: var(--fs-md);
+}
+
+.stat-value-sm {
+    font-size: var(--fs-2xl);
+}
+
 /* ── Grid Layout (legacy) ──────────────────── */
 .grid {
     display: grid;
@@ -1274,7 +1464,7 @@ button.bg-green-500:hover {
     }
 
     .nav-link {
-        font-size: 14px;
+        font-size: var(--fs-body);
         padding: 8px 0;
     }
 
@@ -1306,6 +1496,42 @@ button.bg-green-500:hover {
         order: -1;
     }
 
+    /* H2H compact scoreboard on mobile */
+    .h2h-races-header {
+        grid-template-columns: 44px 1fr 44px;
+        padding: 8px 12px;
+        font-size: var(--fs-micro);
+    }
+
+    .h2h-race-row {
+        grid-template-columns: 44px 1fr 44px;
+        padding: 10px 12px;
+    }
+
+    .h2h-race-score {
+        font-size: var(--fs-body);
+    }
+
+    .h2h-race-title {
+        font-size: var(--fs-sm);
+    }
+
+    .h2h-quiz-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+        gap: 4px;
+        padding: 8px;
+        font-size: var(--fs-xs);
+    }
+
+    .h2h-question-text {
+        font-size: var(--fs-micro);
+    }
+
+    .h2h-answer {
+        font-size: var(--fs-micro);
+        padding: 3px 4px;
+    }
+
     .next-race-banner {
         flex-direction: column;
         text-align: center;
@@ -1315,38 +1541,99 @@ button.bg-green-500:hover {
     .next-race-countdown-wrap {
         text-align: center;
     }
+
+    /* Toast: full-width on mobile */
+    .toast-container {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+    }
+
+    .toast {
+        max-width: 100%;
+    }
+
+    /* Footer: stack on narrow screens */
+    .footer-content {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+
+    /* Sparkline: hide labels when crowded, shrink values */
+    .sparkline {
+        height: 90px;
+        gap: 3px;
+    }
+
+    .sparkline-bar-label {
+        display: none;
+    }
+
+    .sparkline-bar-value {
+        font-size: var(--fs-micro);
+        top: -16px;
+    }
+
+    /* Rankings: bigger touch targets */
+    .rankings-table-wrap td {
+        padding: 12px 10px;
+    }
+
+    .rankings-table-wrap th {
+        padding: 10px 8px;
+        font-size: var(--fs-micro);
+    }
 }
 
 @media (max-width: 480px) {
     .header-title {
-        font-size: 18px;
+        font-size: var(--fs-lg);
     }
 
     .nav-link {
-        font-size: 11px;
+        font-size: var(--fs-micro);
         letter-spacing: 0.3px;
     }
 
     .question-text {
-        font-size: 15px;
+        font-size: var(--fs-body);
     }
 
     .option-label {
         padding: 10px 12px;
-        font-size: 14px;
+        font-size: var(--fs-body);
     }
 
     .btn {
         padding: 10px 16px;
-        font-size: 13px;
+        font-size: var(--fs-sm);
     }
 
     .stat-value {
-        font-size: 28px;
+        font-size: var(--fs-3xl);
     }
 
     .score {
-        font-size: 40px;
+        font-size: var(--fs-5xl);
+    }
+
+    /* H2H player cards: tighter on very small screens */
+    .h2h-player {
+        padding: 12px;
+    }
+
+    .h2h-stat {
+        font-size: 1.625rem;
+    }
+
+    .h2h-player-name {
+        font-size: var(--fs-body);
+    }
+
+    /* Next race countdown: scale down */
+    .next-race-countdown {
+        font-size: var(--fs-2xl);
     }
 }
 
@@ -1371,7 +1658,7 @@ button.bg-green-500:hover {
 }
 
 .landing-subtext {
-    font-size: 17px;
+    font-size: var(--fs-lg);
     color: var(--wc-text-secondary);
     line-height: 1.6;
     max-width: 480px;
@@ -1394,7 +1681,7 @@ button.bg-green-500:hover {
 }
 
 .pitch-title {
-    font-size: 14px;
+    font-size: var(--fs-body);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -1403,7 +1690,7 @@ button.bg-green-500:hover {
 }
 
 .pitch-text {
-    font-size: 15px;
+    font-size: var(--fs-body);
     color: var(--wc-text-secondary);
     line-height: 1.55;
 }
@@ -1418,7 +1705,7 @@ button.bg-green-500:hover {
 }
 
 .testimonial-prefix {
-    font-size: 10px;
+    font-size: var(--fs-micro);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1.5px;
@@ -1427,7 +1714,7 @@ button.bg-green-500:hover {
 }
 
 .testimonial-quote {
-    font-size: 19px;
+    font-size: var(--fs-lg);
     font-weight: 500;
     font-style: italic;
     color: var(--wc-text);
@@ -1459,7 +1746,7 @@ button.bg-green-500:hover {
 }
 
 .footer-copy {
-    font-size: 12px;
+    font-size: var(--fs-xs);
     color: var(--wc-text-muted);
 }
 
@@ -1470,7 +1757,7 @@ button.bg-green-500:hover {
 }
 
 .footer-link {
-    font-size: 12px;
+    font-size: var(--fs-xs);
     color: var(--wc-text-secondary);
     text-decoration: none;
     transition: color var(--duration-fast);
@@ -1482,5 +1769,6 @@ button.bg-green-500:hover {
 
 .footer-separator {
     color: var(--wc-text-muted);
-    font-size: 12px;
+    font-size: var(--fs-xs);
 }
+

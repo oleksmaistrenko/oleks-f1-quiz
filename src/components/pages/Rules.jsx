@@ -7,7 +7,7 @@ const Rules = () => {
       <h1 className="card-title">Race Briefing</h1>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Predict
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -17,7 +17,7 @@ const Rules = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Score
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -28,7 +28,7 @@ const Rules = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Win
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -37,7 +37,14 @@ const Rules = () => {
         </p>
       </div>
 
-      <h2 className="card-title" style={{ margin: "32px 0 16px", fontSize: "16px" }}>
+      <div className="question-container" style={{ borderLeft: "3px solid var(--wc-red)", paddingLeft: "16px", fontStyle: "italic" }}>
+        <p className="text-secondary" style={{ lineHeight: "1.7", margin: 0 }}>
+          <span className="text-red font-bold">"We are checking."</span> — The most iconic non-answer in F1 history.
+          That's the spirit of this game: questions so awkward that even the pit wall has no data. You predict, you hope, you check after the race.
+        </p>
+      </div>
+
+      <h2 className="card-title card-title-sm" style={{ margin: "32px 0 16px" }}>
         Good to Know
       </h2>
 
@@ -54,26 +61,26 @@ const Rules = () => {
         ))}
       </div>
 
-      <h2 className="card-title" style={{ margin: "32px 0 16px", fontSize: "16px" }}>
+      <h2 className="card-title card-title-sm" style={{ margin: "32px 0 16px" }}>
         Explore
       </h2>
 
       <div className="dashboard-stats">
         <Link to="/rankings">
           <div className="stat-card" style={{ cursor: "pointer" }}>
-            <div className="stat-value" style={{ fontSize: "22px" }}>Rankings</div>
+            <div className="stat-value stat-value-sm">Rankings</div>
             <div className="stat-label">Season standings</div>
           </div>
         </Link>
         <Link to="/dashboard">
           <div className="stat-card" style={{ cursor: "pointer" }}>
-            <div className="stat-value" style={{ fontSize: "22px" }}>Dashboard</div>
+            <div className="stat-value stat-value-sm">Dashboard</div>
             <div className="stat-label">Your stats</div>
           </div>
         </Link>
         <Link to="/head-to-head">
           <div className="stat-card" style={{ cursor: "pointer" }}>
-            <div className="stat-value" style={{ fontSize: "22px" }}>H2H</div>
+            <div className="stat-value stat-value-sm">H2H</div>
             <div className="stat-label">Compare with friends</div>
           </div>
         </Link>

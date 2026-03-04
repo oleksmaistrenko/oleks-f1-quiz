@@ -10,7 +10,7 @@ const Privacy = () => {
       </p>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           What We Collect
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -25,7 +25,7 @@ const Privacy = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           How We Use It
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -34,7 +34,7 @@ const Privacy = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Data Storage
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -46,7 +46,7 @@ const Privacy = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Third Parties
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -55,7 +55,7 @@ const Privacy = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Cookies
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -64,7 +64,7 @@ const Privacy = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Data Retention
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -73,7 +73,7 @@ const Privacy = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Your Rights
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -82,7 +82,7 @@ const Privacy = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Children
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -91,7 +91,7 @@ const Privacy = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Changes to This Policy
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -99,18 +99,8 @@ const Privacy = () => {
         </p>
       </div>
 
-      <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
-          Contact
-        </div>
-        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
-          For privacy-related questions or data requests, contact us at{" "}
-          <a href="mailto:hello@we-check.ing" className="text-red">hello@we-check.ing</a>.
-        </p>
-      </div>
-
       <div style={{ marginTop: "24px", textAlign: "center" }}>
-        <Link to="/terms" className="text-red" style={{ fontWeight: 600, fontSize: "14px" }}>
+        <Link to="/terms" className="text-red" style={{ fontWeight: 600 }}>
           ← View Terms of Service
         </Link>
       </div>

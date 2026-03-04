@@ -40,7 +40,6 @@ const QuizGame = () => {
   const [reminderSet, setReminderSet] = useState(false);
   const addToast = useToast();
   const nextRace = getNextRace();
-
   // Handle answer selection
   const handleAnswerSelect = (questionId, selectedAnswer) => {
     const previousAnswer = answers[questionId];
@@ -348,7 +347,7 @@ const QuizGame = () => {
         <div className="transmission-bar">
           <div className="transmission-bar-closed" />
         </div>
-        <div style={{ fontSize: "48px", marginBottom: "16px", opacity: 0.6 }}>
+        <div style={{ fontSize: "var(--fs-hero)", marginBottom: "16px", opacity: 0.6 }}>
           &#x1F3CE;
         </div>
         <h2 className="card-title" style={{ marginBottom: "8px" }}>
@@ -401,9 +400,9 @@ const QuizGame = () => {
       )}
 
       <div className="mb-6">
-        <div className="flex justify-between items-center mb-2">
+        <div className="quiz-header-row">
           <h1 className="card-title" style={{ marginBottom: 0 }}>{currentQuiz.title}</h1>
-          <div className="flex items-center gap-2">
+          <div className="quiz-header-meta">
             <div className="timer">
               <span style={quizClosed ? { color: 'var(--wc-red)' } : undefined}>
                 {timeRemaining}
@@ -417,7 +416,7 @@ const QuizGame = () => {
 
         {userProfile && (
           <div className="text-sm text-secondary">
-            <span className="font-semibold">{userProfile.username}</span>, do you copy?
+            <span className="font-semibold">{userProfile.username}</span>, it's lights out and away we go
           </div>
         )}
       </div>
@@ -471,7 +470,7 @@ const QuizGame = () => {
 
             {submitted && !showChecking && (
               <div className="alert alert-success" style={{ margin: 0 }}>
-                Copy. You can change predictions until the chequered flag.
+                Received. Change of plan still possible before lights out.
               </div>
             )}
 

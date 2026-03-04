@@ -1,5 +1,6 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { trackEvent } from "./firebase";
 import QuizGame from "./components/quiz/QuizGame";
 import QuizAdmin from "./components/quiz/QuizAdmin";
 import Login from "./components/auth/Login";
@@ -16,9 +17,18 @@ import { ToastProvider } from "./components/ui/Toast";
 import "./styles/index.css";
 import "./styles/App.css";
 
+function PageViewTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    trackEvent("page_view", { page_path: location.pathname });
+  }, [location]);
+  return null;
+}
+
 function App() {
   return (
     <Router>
+      <PageViewTracker />
       <ToastProvider>
         <div className="min-h-screen">
           <Header />

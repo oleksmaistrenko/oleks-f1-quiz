@@ -12,6 +12,8 @@ const HeadToHead = () => {
   const [allAnswers, setAllAnswers] = useState([]);
   const [player1Id, setPlayer1Id] = useState("");
   const [player2Id, setPlayer2Id] = useState("");
+  const [selectedQuizId, setSelectedQuizId] = useState("all");
+  const [expandedQuiz, setExpandedQuiz] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -63,6 +65,23 @@ const HeadToHead = () => {
     fetchData();
   }, [user]);
 
+  // When filtering to a single quiz, auto-expand it
+  useEffect(() => {
+    if (selectedQuizId !== "all") {
+      setExpandedQuiz(0);
+    } else {
+      setExpandedQuiz(null);
+    }
+  }, [selectedQuizId]);
+
+  const now = new Date();
+  const closedQuizzes = quizzes.filter((quiz) => {
+    const endTime = quiz.endTime instanceof Date
+      ? quiz.endTime
+      : quiz.endTime?.toDate?.() ?? new Date(0);
+    return now >= endTime;
+  });
+
   const getComparison = () => {
     if (!player1Id || !player2Id) return null;
 
@@ -76,8 +95,10 @@ const HeadToHead = () => {
     let agreed = 0;
     let totalQuestions = 0;
 
-    const quizComparisons = quizzes
+    const quizComparisons = closedQuizzes
       .filter((quiz) => {
+        if (selectedQuizId !== "all" && quiz.id !== selectedQuizId) return false;
+
         const p1Answer = allAnswers.find(
           (a) => a.userId === player1Id && a.quizId === quiz.id
         );
@@ -148,6 +169,12 @@ const HeadToHead = () => {
 
   const comparison = getComparison();
 
+  const getWinnerClass = (s1, s2) => {
+    if (s1 > s2) return "h2h-winner";
+    if (s1 < s2) return "h2h-loser";
+    return "";
+  };
+
   return (
     <div className="card">
       <h1 className="card-title">Head to Head</h1>
@@ -182,6 +209,22 @@ const HeadToHead = () => {
         </select>
       </div>
 
+      {closedQuizzes.length > 0 && (
+        <div style={{ marginBottom: "16px" }}>
+          <select
+            value={selectedQuizId}
+            onChange={(e) => setSelectedQuizId(e.target.value)}
+          >
+            <option value="all">All Rounds</option>
+            {closedQuizzes.map((quiz) => (
+              <option key={quiz.id} value={quiz.id}>
+                {quiz.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {comparison && comparison.quizComparisons.length > 0 ? (
         <>
           <div className="h2h-summary">
@@ -211,80 +254,76 @@ const HeadToHead = () => {
             </div>
           </div>
 
-          {comparison.quizComparisons.map((quiz, qi) => (
-            <div key={qi} className="question-container" style={{ marginBottom: "16px" }}>
-              <div className="question-text" style={{ marginBottom: "12px" }}>
-                {quiz.title}
-              </div>
-              <div
-                className="h2h-quiz-row"
-                style={{
-                  borderBottom: "2px solid var(--wc-border)",
-                  fontWeight: 700,
-                  fontSize: "12px",
-                  color: "var(--wc-text-secondary)",
-                  textTransform: "uppercase",
-                }}
-              >
-                <div style={{ textAlign: "center" }}>{comparison.p1Name}</div>
-                <div style={{ textAlign: "center" }}>Question</div>
-                <div style={{ textAlign: "center" }}>{comparison.p2Name}</div>
-              </div>
-              {quiz.questions.map((q, i) => (
-                <div key={i} className="h2h-quiz-row">
-                  <div
-                    className={`h2h-answer ${
-                      !q.p1Ans
-                        ? "h2h-answer-na"
-                        : q.correct && q.p1Ans === q.correct
-                        ? "h2h-answer-correct"
-                        : q.correct
-                        ? "h2h-answer-wrong"
-                        : ""
-                    }`}
-                  >
-                    {q.p1Ans || "-"}
-                  </div>
-                  <div className="text-sm" style={{ textAlign: "center" }}>
-                    {q.text}
-                  </div>
-                  <div
-                    className={`h2h-answer ${
-                      !q.p2Ans
-                        ? "h2h-answer-na"
-                        : q.correct && q.p2Ans === q.correct
-                        ? "h2h-answer-correct"
-                        : q.correct
-                        ? "h2h-answer-wrong"
-                        : ""
-                    }`}
-                  >
-                    {q.p2Ans || "-"}
-                  </div>
-                </div>
-              ))}
-              <div
-                className="h2h-quiz-row"
-                style={{ fontWeight: 700, borderTop: "2px solid var(--wc-border)" }}
-              >
-                <div style={{ textAlign: "center", color: "var(--wc-red)" }}>
-                  {quiz.p1Score}
-                </div>
-                <div
-                  style={{
-                    textAlign: "center",
-                    color: "var(--wc-text-secondary)",
-                    fontSize: "12px",
-                  }}
-                >
-                  Score
-                </div>
-                <div style={{ textAlign: "center", color: "var(--wc-red)" }}>
-                  {quiz.p2Score}
-                </div>
-              </div>
+          {/* Compact race-by-race scoreboard */}
+          <div className="h2h-races">
+            <div className="h2h-races-header">
+              <div>{comparison.p1Name}</div>
+              <div>Round</div>
+              <div>{comparison.p2Name}</div>
             </div>
-          ))}
+
+            {comparison.quizComparisons.map((quiz, qi) => {
+              const isExpanded = expandedQuiz === qi;
+
+              return (
+                <div key={qi} className="h2h-race-block">
+                  <div
+                    className={`h2h-race-row ${isExpanded ? "h2h-race-row-active" : ""}`}
+                    onClick={() => setExpandedQuiz(isExpanded ? null : qi)}
+                  >
+                    <div className={`h2h-race-score ${getWinnerClass(quiz.p1Score, quiz.p2Score)}`}>
+                      {quiz.p1Score}
+                    </div>
+                    <div className="h2h-race-title">
+                      {quiz.title}
+                      <span className="h2h-race-chevron">{isExpanded ? "▲" : "▼"}</span>
+                    </div>
+                    <div className={`h2h-race-score ${getWinnerClass(quiz.p2Score, quiz.p1Score)}`}>
+                      {quiz.p2Score}
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="h2h-race-details">
+                      {quiz.questions.map((q, i) => (
+                        <div key={i} className="h2h-quiz-row">
+                          <div
+                            className={`h2h-answer ${
+                              !q.p1Ans
+                                ? "h2h-answer-na"
+                                : q.correct && q.p1Ans === q.correct
+                                ? "h2h-answer-correct"
+                                : q.correct
+                                ? "h2h-answer-wrong"
+                                : ""
+                            }`}
+                          >
+                            {q.p1Ans || "-"}
+                          </div>
+                          <div className="h2h-question-text">
+                            {q.text}
+                          </div>
+                          <div
+                            className={`h2h-answer ${
+                              !q.p2Ans
+                                ? "h2h-answer-na"
+                                : q.correct && q.p2Ans === q.correct
+                                ? "h2h-answer-correct"
+                                : q.correct
+                                ? "h2h-answer-wrong"
+                                : ""
+                            }`}
+                          >
+                            {q.p2Ans || "-"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </>
       ) : comparison ? (
         <p className="text-gray-500">

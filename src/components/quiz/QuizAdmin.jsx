@@ -416,12 +416,6 @@ const QuizAdmin = () => {
           >
             {showCreateForm ? "Cancel" : "Create New Quiz"}
           </button>
-          <button
-            onClick={handleLogout}
-            className="btn"
-          >
-            Logout
-          </button>
         </div>
       </div>
 
@@ -460,29 +454,15 @@ const QuizAdmin = () => {
                 <h4 className="font-medium mb-2">Question {qIndex + 1}</h4>
 
                 <div className="mb-3">
-                  <input
-                    type="text"
+                  <textarea
                     value={question.text}
                     onChange={(e) =>
                       handleQuestionChange(qIndex, "text", e.target.value)
                     }
                     className="form-input"
                     placeholder="Enter question text"
+                    rows={3}
                   />
-                </div>
-
-                <div className="mb-3">
-                  <p className="form-label">Options (Yes/No)</p>
-                  <div className="flex space-x-4 py-2">
-                    {question.options.map((option, oIndex) => (
-                      <div key={oIndex} className="flex-1 text-center p-2 border rounded bg-gray-50">
-                        {option}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Correct answers will be set after the quiz closes
-                  </p>
                 </div>
               </div>
             ))}
@@ -530,35 +510,15 @@ const QuizAdmin = () => {
                 <h4 className="font-medium mb-2">Question {qIndex + 1}</h4>
 
                 <div className="mb-3">
-                  <input
-                    type="text"
+                  <textarea
                     value={question.text}
                     onChange={(e) =>
                       handleEditQuestionChange(qIndex, "text", e.target.value)
                     }
                     className="form-input"
                     placeholder="Enter question text"
+                    rows={3}
                   />
-                </div>
-
-                <div className="mb-3">
-                  <p className="form-label">Options (Yes/No)</p>
-                  <div className="flex space-x-4 py-2">
-                    {question.options.map((option, oIndex) => (
-                      <div key={oIndex} className="flex-1 text-center p-2 border rounded bg-gray-50">
-                        {option}
-                      </div>
-                    ))}
-                  </div>
-                  {question.correctAnswer ? (
-                    <p className="text-xs text-green-600 mt-1">
-                      Correct answer currently set to: {question.correctAnswer}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Correct answers will be set after the quiz closes
-                    </p>
-                  )}
                 </div>
               </div>
             ))}
@@ -651,7 +611,7 @@ const QuizAdmin = () => {
                 <div key={quiz.id} className="quiz-item">
                   <h3 className="quiz-title">{quiz.title}</h3>
                   <div className="quiz-meta">
-                    <span>Ends: {new Date(quiz.endTime).toLocaleString()}</span>
+                    <span>Ends: {new Date(quiz.endTime).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                     <span>Questions: {quiz.questionCount}</span>
                   </div>
                   <p className="text-sm mb-3">

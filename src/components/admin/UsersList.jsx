@@ -126,7 +126,7 @@ const UsersList = () => {
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    {userData.createdAt ? new Date(userData.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                    {userData.createdAt ? new Date(userData.createdAt.seconds * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : 'N/A'}
                   </td>
                   <td className="py-3 px-4">
                     {userData.id !== user.uid && (

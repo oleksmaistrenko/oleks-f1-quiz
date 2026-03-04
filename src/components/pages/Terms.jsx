@@ -10,7 +10,7 @@ const Terms = () => {
       </p>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Acceptance of Terms
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -19,7 +19,7 @@ const Terms = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Eligibility
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -28,7 +28,7 @@ const Terms = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Accounts
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -37,7 +37,7 @@ const Terms = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Quiz Gameplay
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -46,7 +46,7 @@ const Terms = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Not Affiliated with Formula 1
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -55,7 +55,7 @@ const Terms = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Intellectual Property
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -64,7 +64,7 @@ const Terms = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Termination
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -73,7 +73,7 @@ const Terms = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Limitation of Liability
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -82,7 +82,7 @@ const Terms = () => {
       </div>
 
       <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
+        <div className="question-text text-red">
           Changes to These Terms
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
@@ -90,18 +90,8 @@ const Terms = () => {
         </p>
       </div>
 
-      <div className="question-container">
-        <div className="question-text text-red" style={{ fontSize: "16px" }}>
-          Contact
-        </div>
-        <p className="text-secondary" style={{ lineHeight: "1.7" }}>
-          If you have questions about these terms, contact us at{" "}
-          <a href="mailto:hello@we-check.ing" className="text-red">hello@we-check.ing</a>.
-        </p>
-      </div>
-
       <div style={{ marginTop: "24px", textAlign: "center" }}>
-        <Link to="/privacy" className="text-red" style={{ fontWeight: 600, fontSize: "14px" }}>
+        <Link to="/privacy" className="text-red" style={{ fontWeight: 600 }}>
           View Privacy Policy →
         </Link>
       </div>

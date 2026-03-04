@@ -9,9 +9,12 @@ import { db, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
+const HISTORY_PREVIEW = 5;
+
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showAllHistory, setShowAllHistory] = useState(false);
   const [stats, setStats] = useState({
     totalPoints: 0,
     quizzesPlayed: 0,
@@ -102,6 +105,12 @@ const Dashboard = () => {
     1
   );
 
+  const historyReversed = stats.quizScores.slice().reverse();
+  const historyToShow = showAllHistory
+    ? historyReversed
+    : historyReversed.slice(0, HISTORY_PREVIEW);
+  const hasMoreHistory = historyReversed.length > HISTORY_PREVIEW;
+
   return (
     <div className="card">
       <h1 className="card-title">Pit Wall</h1>
@@ -123,48 +132,66 @@ const Dashboard = () => {
 
       {stats.quizScores.length > 0 && (
         <>
-          <h2 className="card-title" style={{ fontSize: "16px" }}>
+          <h2 className="card-title card-title-sm">
             Season Progress
           </h2>
-          <div className="sparkline" style={{ marginBottom: "32px" }}>
-            {stats.quizScores.map((q, i) => (
-              <div
-                key={i}
-                className="sparkline-bar"
-                style={{
-                  height: `${(q.score / maxScore) * 100}%`,
-                }}
-                title={`${q.quizTitle}: ${q.score}/${q.total}`}
-              >
-                <div className="sparkline-bar-value">{q.score}</div>
-                <div className="sparkline-bar-label">
-                  {q.quizTitle.length > 8
-                    ? q.quizTitle.slice(0, 8) + "..."
-                    : q.quizTitle}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <h2 className="card-title" style={{ fontSize: "16px", marginTop: "16px" }}>
-            Quiz History
-          </h2>
-          {stats.quizScores
-            .slice()
-            .reverse()
-            .map((q, i) => (
-              <div key={i} className="history-item">
-                <div>
-                  <div className="font-medium">{q.quizTitle}</div>
-                  <div className="text-xs text-gray-500">
-                    {q.submittedAt.toLocaleDateString()}
+          <div className="sparkline-scroll-wrap">
+            <div
+              className="sparkline"
+              style={{
+                marginBottom: "32px",
+                minWidth: stats.quizScores.length > 12
+                  ? `${stats.quizScores.length * 48}px`
+                  : undefined,
+              }}
+            >
+              {stats.quizScores.map((q, i) => (
+                <div
+                  key={i}
+                  className="sparkline-bar"
+                  style={{
+                    height: `${(q.score / maxScore) * 100}%`,
+                  }}
+                  title={`${q.quizTitle}: ${q.score}/${q.total}`}
+                >
+                  <div className="sparkline-bar-value">{q.score}</div>
+                  <div className="sparkline-bar-label">
+                    {q.quizTitle.length > 8
+                      ? q.quizTitle.slice(0, 8) + "…"
+                      : q.quizTitle}
                   </div>
                 </div>
-                <div className="history-score">
-                  {q.score}/{q.total}
+              ))}
+            </div>
+          </div>
+
+          <h2 className="card-title card-title-sm" style={{ marginTop: "16px" }}>
+            Quiz History
+          </h2>
+          {historyToShow.map((q, i) => (
+            <div key={i} className="history-item">
+              <div>
+                <div className="font-medium">{q.quizTitle}</div>
+                <div className="text-xs text-gray-500">
+                  {q.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </div>
               </div>
-            ))}
+              <div className="history-score">
+                {q.score}/{q.total}
+              </div>
+            </div>
+          ))}
+          {hasMoreHistory && (
+            <button
+              className="btn btn-secondary btn-block"
+              style={{ marginTop: "12px" }}
+              onClick={() => setShowAllHistory(!showAllHistory)}
+            >
+              {showAllHistory
+                ? "Show Recent"
+                : `Show All ${historyReversed.length} Rounds`}
+            </button>
+          )}
         </>
       )}
 

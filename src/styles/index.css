@@ -3,7 +3,7 @@
    F1 Quiz App · Dark Cockpit UI
    ═══════════════════════════════════════════════ */
 
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
 
 /* ── Tokens ────────────────────────────────── */
 :root {
@@ -54,6 +54,20 @@
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+    /* Font Scale */
+    --fs-micro: 0.625rem;   /* 10px — badges, micro labels */
+    --fs-xs: 0.75rem;       /* 12px — footer, btn-small, distribution */
+    --fs-sm: 0.8125rem;     /* 13px — nav links, timer, race columns */
+    --fs-body: 0.875rem;    /* 14px — buttons, forms, alerts, body text */
+    --fs-md: 1rem;          /* 16px — question text, player names */
+    --fs-lg: 1.125rem;      /* 18px — quiz titles, h2h-vs, feedback */
+    --fs-xl: 1.25rem;       /* 20px — card titles */
+    --fs-2xl: 1.375rem;     /* 22px — header title, overlay text */
+    --fs-3xl: 1.75rem;      /* 28px — countdown */
+    --fs-4xl: 2rem;         /* 32px — h2h stats */
+    --fs-5xl: 2.25rem;      /* 36px — stat values */
+    --fs-hero: 3rem;        /* 48px — big score display */
 
     /* Motion */
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -185,13 +199,16 @@ h1, h2, h3, h4 {
 .min-h-screen { min-height: 100vh; }
 
 /* Text */
-.text-xs { font-size: 0.75rem; }
-.text-sm { font-size: 0.875rem; }
-.text-base { font-size: 1rem; }
-.text-lg { font-size: 1.125rem; }
-.text-xl { font-size: 1.25rem; }
+.text-micro { font-size: var(--fs-micro); }
+.text-xs { font-size: var(--fs-xs); }
+.text-sm { font-size: var(--fs-body); }
+.text-base { font-size: var(--fs-md); }
+.text-lg { font-size: var(--fs-lg); }
+.text-xl { font-size: var(--fs-xl); }
 .text-2xl { font-size: 1.5rem; }
-.text-3xl { font-size: 2rem; }
+.text-3xl { font-size: var(--fs-4xl); }
+.text-4xl { font-size: var(--fs-4xl); }
+.text-5xl { font-size: var(--fs-5xl); }
 
 .font-medium { font-weight: 500; }
 .font-semibold { font-weight: 600; }
