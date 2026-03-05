@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   doc,
@@ -16,6 +16,8 @@ import {
 import { db, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import CheckingOverlay from "../ui/CheckingOverlay";
+import ShareCard from "../ui/ShareCard";
+import Skeleton from "../ui/Skeleton";
 import { useToast } from "../ui/Toast";
 import { getNextRace, getDaysUntil } from "../../data/f1-calendar-2026";
 
@@ -31,6 +33,7 @@ const QuizGame = () => {
 
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const submittedRef = useRef(false);
   const [score, setScore] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState("");
   const [quizClosed, setQuizClosed] = useState(false);
@@ -126,17 +129,10 @@ const QuizGame = () => {
         const now = new Date();
         const quizEnded = now >= endTime;
 
-        setCurrentQuiz({
-          id: quizDoc.id,
-          title: quizData.title,
-          timeLimit: endTime,
-          questions: quizData.questions.map((q, index) => ({
-            id: `q${index + 1}`,
-            text: q.text,
-            options: q.options,
-            correctAnswer: quizEnded ? q.correctAnswer : null,
-          })),
-        });
+        if (quizEnded) {
+          setQuizClosed(true);
+          setTimeRemaining("Chequered flag");
+        }
 
         if (user) {
           try {
@@ -154,11 +150,24 @@ const QuizGame = () => {
                 setScore(userAnswersData.score);
               }
               setSubmitted(true);
+              submittedRef.current = true;
             }
           } catch (err) {
             console.error("Error checking existing answers:", err);
           }
         }
+
+        setCurrentQuiz({
+          id: quizDoc.id,
+          title: quizData.title,
+          timeLimit: endTime,
+          questions: quizData.questions.map((q, index) => ({
+            id: `q${index + 1}`,
+            text: q.text,
+            options: q.options,
+            correctAnswer: quizEnded ? q.correctAnswer : null,
+          })),
+        });
 
         setLoading(false);
       } catch (error) {
@@ -184,7 +193,7 @@ const QuizGame = () => {
         clearInterval(timer);
         setTimeRemaining("Chequered flag");
 
-        if (!submitted) {
+        if (!submittedRef.current) {
           handleSubmit();
         }
       } else {
@@ -202,7 +211,7 @@ const QuizGame = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuiz, submitted]);
+  }, [currentQuiz]);
 
   // Fetch answer distribution when quiz is closed
   useEffect(() => {
@@ -298,17 +307,22 @@ const QuizGame = () => {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       setSubmitted(true);
+      submittedRef.current = true;
       setShowChecking(false);
       addToast("Copy, we are checking", "success", 3000);
 
       try {
-        const userAnswersQuery = query(
-          collection(db, "quizAnswers"),
-          where("userId", "==", user.uid)
-        );
-        const userAnswersSnapshot = await getDocs(userAnswersQuery);
-        if (userAnswersSnapshot.size <= 1) {
-          setShowNotifPrompt(true);
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        const alreadyOptedIn = userDoc.exists() && userDoc.data().notificationOptIn === true;
+        if (!alreadyOptedIn) {
+          const userAnswersQuery = query(
+            collection(db, "quizAnswers"),
+            where("userId", "==", user.uid)
+          );
+          const userAnswersSnapshot = await getDocs(userAnswersQuery);
+          if (userAnswersSnapshot.size <= 1) {
+            setShowNotifPrompt(true);
+          }
         }
       } catch (e) {
         // Non-critical
@@ -320,23 +334,22 @@ const QuizGame = () => {
     }
   };
 
-  // Auth loading state
-  if (authLoading) {
+  if (authLoading || (!user && !error) || loading) {
     return (
-      <div className="loading">
-        <div className="loading-spinner"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  if (loading) {
-    return (
-      <div className="loading">
-        <div className="loading-spinner"></div>
+      <div className="card">
+        <Skeleton width="100%" height="4px" borderRadius="0" style={{ marginBottom: "20px" }} />
+        <Skeleton width="200px" height="28px" style={{ marginBottom: "8px" }} />
+        <Skeleton width="140px" height="16px" style={{ marginBottom: "32px" }} />
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="question-container">
+            <Skeleton width={`${50 + i * 10}%`} height="18px" style={{ marginBottom: "12px" }} />
+            <div className="flex gap-3">
+              <Skeleton height="44px" borderRadius="var(--radius-md)" style={{ flex: 1 }} />
+              <Skeleton height="44px" borderRadius="var(--radius-md)" style={{ flex: 1 }} />
+            </div>
+          </div>
+        ))}
+        <Skeleton height="48px" borderRadius="var(--radius-md)" style={{ marginTop: "16px" }} />
       </div>
     );
   }
@@ -479,7 +492,7 @@ const QuizGame = () => {
                 onClick={handleRemindMe}
                 className="btn btn-secondary btn-block"
               >
-                Slow Button On
+                Remind Me Before Deadline
               </button>
             )}
 
@@ -512,14 +525,21 @@ const QuizGame = () => {
       ) : (
         <div className="results">
           <div className="text-2xl font-bold mb-4 text-center">
-            Your answers have been submitted
+            Transmission received
           </div>
 
-          {quizClosed && (
-            <div className="score">
-              {score} / {currentQuiz.questions.length}
-            </div>
-          )}
+          <div className="score">
+            {score} / {currentQuiz.questions.length}
+          </div>
+
+          <ShareCard
+            quizTitle={currentQuiz.title}
+            score={score}
+            totalQuestions={currentQuiz.questions.length}
+            answers={answers}
+            correctAnswers={currentQuiz.questions.map((q) => q.correctAnswer)}
+            username={userProfile?.username || "Driver"}
+          />
 
           <div className="space-y-4">
             {currentQuiz.questions.map((question, index) => (
@@ -545,7 +565,7 @@ const QuizGame = () => {
                 {distribution[question.id] && distribution[question.id].total > 0 && (
                   <div className="mt-2">
                     <div className="text-xs text-secondary mb-1">
-                      Community predictions ({distribution[question.id].total} votes)
+                      Grid predictions ({distribution[question.id].total} drivers)
                     </div>
                     <div className="distribution-bar">
                       <div

@@ -708,8 +708,8 @@ button.bg-green-500:hover {
     bottom: -22px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: var(--fs-micro);
-    color: var(--wc-text-muted);
+    font-size: var(--fs-xs);
+    color: var(--wc-text-secondary);
     white-space: nowrap;
 }
 
@@ -737,11 +737,96 @@ button.bg-green-500:hover {
     border-bottom: none;
 }
 
+.history-item-expandable {
+    cursor: pointer;
+    transition: background-color var(--duration-fast);
+}
+
+.history-item-expandable:hover {
+    background-color: var(--wc-surface);
+}
+
+.history-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.history-expand-arrow {
+    display: inline-block;
+    font-size: 10px;
+    color: var(--wc-text-muted);
+    transition: transform 0.2s var(--ease-out);
+    flex-shrink: 0;
+}
+
+.history-expand-arrow-open {
+    transform: rotate(90deg);
+}
+
 .history-score {
     font-family: "JetBrains Mono", monospace;
     font-weight: 700;
     color: var(--wc-red);
     font-size: var(--fs-body);
+}
+
+/* Expanded answer detail */
+.history-detail {
+    padding: 4px 0 12px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.history-detail-row {
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--wc-border);
+    background-color: var(--wc-surface);
+    font-size: var(--fs-sm);
+}
+
+.history-detail-correct {
+    border-left-color: var(--wc-success);
+    background-color: var(--wc-success-dim);
+}
+
+.history-detail-wrong {
+    border-left-color: var(--wc-error);
+    background-color: var(--wc-error-dim);
+}
+
+.history-detail-question {
+    font-weight: 500;
+    color: var(--wc-text);
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.history-detail-answers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: var(--fs-xs);
+    color: var(--wc-text-secondary);
+}
+
+.history-detail-user-answer {
+    font-weight: 600;
+    color: var(--wc-text);
+}
+
+.history-detail-pending {
+    color: var(--wc-text-muted);
+    font-style: italic;
+}
+
+.history-detail-empty {
+    color: var(--wc-text-muted);
+    font-size: var(--fs-sm);
+    padding: 8px 0;
 }
 
 /* ── Rankings / Leaderboard ────────────────── */
@@ -800,6 +885,19 @@ button.bg-green-500:hover {
 
 .rankings-col-driver {
     white-space: nowrap;
+    position: sticky;
+    left: 36px;
+    z-index: 2;
+    background-color: var(--wc-surface);
+}
+
+thead .rankings-col-driver {
+    background-color: var(--wc-carbon);
+    z-index: 3;
+}
+
+tbody tr:hover .rankings-col-driver {
+    background-color: var(--wc-surface-hover);
 }
 
 .rankings-col-total {
@@ -856,10 +954,15 @@ tbody tr:hover .rankings-col-rank {
 /* ── Head to Head ──────────────────────────── */
 .h2h-selector {
     display: flex;
-    gap: 16px;
+    flex-direction: column;
+    gap: 12px;
     margin-bottom: var(--space-lg);
+}
+
+.h2h-players {
+    display: flex;
+    gap: 12px;
     align-items: center;
-    flex-wrap: wrap;
 }
 
 .h2h-selector select {
@@ -871,11 +974,16 @@ tbody tr:hover .rankings-col-rank {
     font-family: "Outfit", sans-serif;
     font-size: var(--fs-body);
     flex: 1;
-    min-width: 140px;
+    min-width: 0;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%237E7E98' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 14px center;
+}
+
+.h2h-players select {
+    flex: 1;
+    min-width: 0;
 }
 
 .h2h-vs {
@@ -884,6 +992,7 @@ tbody tr:hover .rankings-col-rank {
     color: var(--wc-red);
     text-transform: uppercase;
     letter-spacing: 1px;
+    flex-shrink: 0;
 }
 
 .h2h-summary {
@@ -1391,6 +1500,18 @@ tbody tr:hover .rankings-col-rank {
     animation: spin 0.8s linear infinite;
 }
 
+/* ── Skeleton Loaders ─────────────────────── */
+.skeleton {
+    background: linear-gradient(90deg, var(--wc-surface) 25%, var(--wc-surface-hover) 50%, var(--wc-surface) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
 /* ── Tip Row (Rules page) ──────────────────── */
 .tip-row {
     display: flex;
@@ -1575,6 +1696,23 @@ tbody tr:hover .rankings-col-rank {
         top: -16px;
     }
 
+    /* History detail: tighter on mobile */
+    .history-detail {
+        padding-left: 12px;
+    }
+
+    .history-detail-row {
+        padding: 6px 10px;
+    }
+
+    .history-detail-question {
+        font-size: var(--fs-xs);
+    }
+
+    .history-detail-answers {
+        font-size: var(--fs-micro);
+    }
+
     /* Rankings: bigger touch targets */
     .rankings-table-wrap td {
         padding: 12px 10px;
@@ -1583,6 +1721,22 @@ tbody tr:hover .rankings-col-rank {
     .rankings-table-wrap th {
         padding: 10px 8px;
         font-size: var(--fs-micro);
+    }
+
+    /* Touch target minimums */
+    .h2h-selector select,
+    .btn,
+    .option-label {
+        min-height: 44px;
+    }
+
+    /* H2H selects: stack vertically on narrow screens */
+    .h2h-players {
+        flex-direction: column;
+    }
+
+    .h2h-vs {
+        font-size: var(--fs-body);
     }
 }
 
@@ -1732,6 +1886,34 @@ tbody tr:hover .rankings-col-rank {
     }
 }
 
+/* ── Share Card ───────────────────────────── */
+.share-card {
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-md);
+}
+
+.share-card-preview {
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--wc-border);
+    margin-bottom: var(--space-md);
+    box-shadow: var(--shadow-md);
+}
+
+.share-card-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.share-card-actions .btn {
+    flex: 1;
+}
+
+.share-card + .btn-challenge {
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
 /* ── Footer ───────────────────────────────── */
 .footer {
     border-top: 1px solid var(--wc-border);
@@ -1771,4 +1953,5 @@ tbody tr:hover .rankings-col-rank {
     color: var(--wc-text-muted);
     font-size: var(--fs-xs);
 }
+
 

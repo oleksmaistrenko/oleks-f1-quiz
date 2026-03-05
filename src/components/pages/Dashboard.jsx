@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
   collection,
+  doc,
+  getDoc,
   getDocs,
   query,
   where,
@@ -8,6 +10,7 @@ import {
 import { db, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import Skeleton from "../ui/Skeleton";
 
 const HISTORY_PREVIEW = 5;
 
@@ -15,6 +18,8 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const [expandedQuizIndex, setExpandedQuizIndex] = useState(null);
+  const [quizCache, setQuizCache] = useState({});
   const [stats, setStats] = useState({
     totalPoints: 0,
     quizzesPlayed: 0,
@@ -67,6 +72,8 @@ const Dashboard = () => {
             score,
             total,
             submittedAt: data.submittedAt?.toDate?.() || new Date(),
+            answers: data.answers || {},
+            quizId: data.quizId || null,
           });
         });
 
@@ -94,8 +101,18 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="loading">
-        <div className="loading-spinner"></div>
+      <div className="card">
+        <Skeleton width="140px" height="28px" style={{ marginBottom: "24px" }} />
+        <div className="dashboard-stats">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="stat-card">
+              <Skeleton width="48px" height="32px" style={{ marginBottom: "8px" }} />
+              <Skeleton width="80px" height="14px" />
+            </div>
+          ))}
+        </div>
+        <Skeleton width="160px" height="22px" style={{ marginTop: "24px", marginBottom: "16px" }} />
+        <Skeleton height="120px" borderRadius="var(--radius-md)" style={{ marginBottom: "32px" }} />
       </div>
     );
   }
@@ -104,6 +121,24 @@ const Dashboard = () => {
     ...stats.quizScores.map((q) => q.total),
     1
   );
+
+  const handleToggleExpand = async (index, quizId) => {
+    if (expandedQuizIndex === index) {
+      setExpandedQuizIndex(null);
+      return;
+    }
+    setExpandedQuizIndex(index);
+    if (quizId && !quizCache[quizId]) {
+      try {
+        const quizDoc = await getDoc(doc(db, "quizzes", quizId));
+        if (quizDoc.exists()) {
+          setQuizCache((prev) => ({ ...prev, [quizId]: quizDoc.data() }));
+        }
+      } catch (err) {
+        console.error("Error fetching quiz details:", err);
+      }
+    }
+  };
 
   const historyReversed = stats.quizScores.slice().reverse();
   const historyToShow = showAllHistory
@@ -168,19 +203,72 @@ const Dashboard = () => {
           <h2 className="card-title card-title-sm" style={{ marginTop: "16px" }}>
             Quiz History
           </h2>
-          {historyToShow.map((q, i) => (
-            <div key={i} className="history-item">
-              <div>
-                <div className="font-medium">{q.quizTitle}</div>
-                <div className="text-xs text-gray-500">
-                  {q.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          {historyToShow.map((q, i) => {
+            const isExpanded = expandedQuizIndex === i;
+            const quizData = q.quizId ? quizCache[q.quizId] : null;
+            const questions = quizData?.questions || [];
+
+            return (
+              <div key={i}>
+                <div
+                  className="history-item history-item-expandable"
+                  onClick={() => handleToggleExpand(i, q.quizId)}
+                >
+                  <div className="history-item-left">
+                    <span className={`history-expand-arrow${isExpanded ? " history-expand-arrow-open" : ""}`}>
+                      ▶
+                    </span>
+                    <div>
+                      <div className="font-medium">{q.quizTitle}</div>
+                      <div className="text-xs text-gray-500">
+                        {q.submittedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="history-score">
+                    {q.score}/{q.total}
+                  </div>
                 </div>
+                {isExpanded && (
+                  <div className="history-detail">
+                    {questions.length > 0 ? (
+                      questions.map((question, qIdx) => {
+                        const questionId = question.id || `q${qIdx + 1}`;
+                        const userAnswer = q.answers[questionId];
+                        const correctAnswer = question.correctAnswer;
+                        const isCorrect = correctAnswer != null && userAnswer === correctAnswer;
+
+                        return (
+                          <div
+                            key={questionId}
+                            className={`history-detail-row ${correctAnswer != null ? (isCorrect ? "history-detail-correct" : "history-detail-wrong") : ""}`}
+                          >
+                            <div className="history-detail-question">{question.text}</div>
+                            <div className="history-detail-answers">
+                              <span className="history-detail-user-answer">
+                                {userAnswer || "—"}
+                              </span>
+                              {correctAnswer != null ? (
+                                <span className={isCorrect ? "text-success" : "text-error"}>
+                                  {isCorrect ? "✓" : `✗ ${correctAnswer}`}
+                                </span>
+                              ) : (
+                                <span className="history-detail-pending">Pending</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : q.quizId ? (
+                      <div className="history-detail-empty">Loading questions…</div>
+                    ) : (
+                      <div className="history-detail-empty">Question details not available</div>
+                    )}
+                  </div>
+                )}
               </div>
-              <div className="history-score">
-                {q.score}/{q.total}
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {hasMoreHistory && (
             <button
               className="btn btn-secondary btn-block"

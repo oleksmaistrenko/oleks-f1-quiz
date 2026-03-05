@@ -10,6 +10,8 @@ const Footer = () => {
           <Link to="/terms" className="footer-link">Terms</Link>
           <span className="footer-separator">&middot;</span>
           <Link to="/privacy" className="footer-link">Privacy</Link>
+          <span className="footer-separator">&middot;</span>
+          <Link to="/feedback" className="footer-link">Feedback</Link>
         </nav>
       </div>
     </footer>

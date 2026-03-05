@@ -83,6 +83,7 @@ const QuizAdmin = () => {
             hasAnswers: hasAnswers
           };
         });
+        quizList.sort((a, b) => b.endTime - a.endTime);
         setQuizzes(quizList);
       } catch (error) {
         console.error("Error loading quizzes:", error);
@@ -625,19 +626,13 @@ const QuizAdmin = () => {
                       className="btn btn-small btn-secondary">
                       Edit
                     </button>
-                    <button className="btn btn-small btn-secondary">
-                      View Results
-                    </button>
-                    <button 
+                    <button
                       onClick={() => {
                         setSelectedQuiz(quiz);
                         setShowAnswersForm(true);
                       }}
                       className="btn btn-small btn-accent">
                       Set Answers
-                    </button>
-                    <button className="btn btn-small btn-secondary">
-                      Share
                     </button>
                   </div>
                 </div>

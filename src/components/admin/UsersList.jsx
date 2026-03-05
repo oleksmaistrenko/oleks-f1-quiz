@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth, getAllUsers, updateUserRole, getUserProfile } from '../../firebase';
+import { auth, getAllUsers, updateUserRole, updateUserElite, getUserProfile } from '../../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const UsersList = () => {
@@ -79,6 +79,18 @@ const UsersList = () => {
     }
   };
 
+  const handleEliteChange = async (userId, isElite) => {
+    try {
+      await updateUserElite(userId, isElite);
+      setUsers(users.map(u =>
+        u.id === userId ? { ...u, elite: isElite } : u
+      ));
+    } catch (error) {
+      console.error("Error updating elite status:", error);
+      alert("Failed to update elite status");
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto my-8 p-6 bg-white rounded shadow text-center">
@@ -108,9 +120,9 @@ const UsersList = () => {
               <tr>
                 <th className="py-3 px-4 text-left font-medium text-gray-600">Username</th>
                 <th className="py-3 px-4 text-left font-medium text-gray-600">Email</th>
-                <th className="py-3 px-4 text-left font-medium text-gray-600">Role</th>
                 <th className="py-3 px-4 text-left font-medium text-gray-600">Created</th>
-                <th className="py-3 px-4 text-left font-medium text-gray-600">Actions</th>
+                <th className="py-3 px-4 text-left font-medium text-gray-600">Elite</th>
+                <th className="py-3 px-4 text-left font-medium text-gray-600">Role</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -119,14 +131,14 @@ const UsersList = () => {
                   <td className="py-3 px-4">{userData.username}</td>
                   <td className="py-3 px-4">{userData.email}</td>
                   <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      userData.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {userData.role || 'user'}
-                    </span>
+                    {userData.createdAt ? new Date(userData.createdAt.seconds * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : 'N/A'}
                   </td>
                   <td className="py-3 px-4">
-                    {userData.createdAt ? new Date(userData.createdAt.seconds * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : 'N/A'}
+                    <input
+                      type="checkbox"
+                      checked={userData.elite === true}
+                      onChange={(e) => handleEliteChange(userData.id, e.target.checked)}
+                    />
                   </td>
                   <td className="py-3 px-4">
                     {userData.id !== user.uid && (

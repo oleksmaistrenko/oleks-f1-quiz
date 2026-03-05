@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import Skeleton from "../ui/Skeleton";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -82,7 +83,15 @@ const HeadToHead = () => {
     return now >= endTime;
   });
 
-  const getComparison = () => {
+  const answersByUserQuiz = useMemo(() => {
+    const map = new Map();
+    allAnswers.forEach((a) => {
+      map.set(`${a.userId}_${a.quizId}`, a);
+    });
+    return map;
+  }, [allAnswers]);
+
+  const comparison = useMemo(() => {
     if (!player1Id || !player2Id) return null;
 
     const p1Name =
@@ -98,22 +107,12 @@ const HeadToHead = () => {
     const quizComparisons = closedQuizzes
       .filter((quiz) => {
         if (selectedQuizId !== "all" && quiz.id !== selectedQuizId) return false;
-
-        const p1Answer = allAnswers.find(
-          (a) => a.userId === player1Id && a.quizId === quiz.id
-        );
-        const p2Answer = allAnswers.find(
-          (a) => a.userId === player2Id && a.quizId === quiz.id
-        );
-        return p1Answer && p2Answer;
+        return answersByUserQuiz.has(`${player1Id}_${quiz.id}`)
+          && answersByUserQuiz.has(`${player2Id}_${quiz.id}`);
       })
       .map((quiz) => {
-        const p1Answer = allAnswers.find(
-          (a) => a.userId === player1Id && a.quizId === quiz.id
-        );
-        const p2Answer = allAnswers.find(
-          (a) => a.userId === player2Id && a.quizId === quiz.id
-        );
+        const p1Answer = answersByUserQuiz.get(`${player1Id}_${quiz.id}`);
+        const p2Answer = answersByUserQuiz.get(`${player2Id}_${quiz.id}`);
 
         const p1Score = p1Answer?.score ?? 0;
         const p2Score = p2Answer?.score ?? 0;
@@ -157,17 +156,23 @@ const HeadToHead = () => {
       totalQuestions,
       quizComparisons,
     };
-  };
+  }, [player1Id, player2Id, allUsers, closedQuizzes, selectedQuizId, answersByUserQuiz]);
 
   if (loading) {
     return (
-      <div className="loading">
-        <div className="loading-spinner"></div>
+      <div className="card">
+        <Skeleton width="180px" height="28px" style={{ marginBottom: "24px" }} />
+        <div className="h2h-selector">
+          <div className="h2h-players">
+            <Skeleton height="44px" borderRadius="var(--radius-md)" style={{ flex: 1 }} />
+            <span className="h2h-vs">VS</span>
+            <Skeleton height="44px" borderRadius="var(--radius-md)" style={{ flex: 1 }} />
+          </div>
+        </div>
+        <Skeleton height="100px" borderRadius="var(--radius-md)" />
       </div>
     );
   }
-
-  const comparison = getComparison();
 
   const getWinnerClass = (s1, s2) => {
     if (s1 > s2) return "h2h-winner";
@@ -180,38 +185,39 @@ const HeadToHead = () => {
       <h1 className="card-title">Head to Head</h1>
 
       <div className="h2h-selector">
-        <select
-          value={player1Id}
-          onChange={(e) => setPlayer1Id(e.target.value)}
-        >
-          <option value="">Select driver</option>
-          {allUsers.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.username}{u.id === user?.uid ? " (you)" : ""}
-            </option>
-          ))}
-        </select>
-
-        <span className="h2h-vs">VS</span>
-
-        <select
-          value={player2Id}
-          onChange={(e) => setPlayer2Id(e.target.value)}
-        >
-          <option value="">Select opponent</option>
-          {allUsers
-            .filter((u) => u.id !== player1Id)
-            .map((u) => (
+        <div className="h2h-players">
+          <select
+            value={player1Id}
+            onChange={(e) => setPlayer1Id(e.target.value)}
+          >
+            <option value="">Select driver</option>
+            {allUsers.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.username}
+                {u.username}{u.id === user?.uid ? " (you)" : ""}
               </option>
             ))}
-        </select>
-      </div>
+          </select>
 
-      {closedQuizzes.length > 0 && (
-        <div style={{ marginBottom: "16px" }}>
+          <span className="h2h-vs">VS</span>
+
           <select
+            value={player2Id}
+            onChange={(e) => setPlayer2Id(e.target.value)}
+          >
+            <option value="">Select opponent</option>
+            {allUsers
+              .filter((u) => u.id !== player1Id)
+              .map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.username}
+                </option>
+              ))}
+          </select>
+        </div>
+
+        {closedQuizzes.length > 0 && (
+          <select
+            className="h2h-round-filter"
             value={selectedQuizId}
             onChange={(e) => setSelectedQuizId(e.target.value)}
           >
@@ -222,8 +228,8 @@ const HeadToHead = () => {
               </option>
             ))}
           </select>
-        </div>
-      )}
+        )}
+      </div>
 
       {comparison && comparison.quizComparisons.length > 0 ? (
         <>

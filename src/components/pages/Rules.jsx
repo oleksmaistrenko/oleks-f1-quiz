@@ -11,7 +11,7 @@ const Rules = () => {
           Predict
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
-          Before each race weekend, a quiz goes live with Yes/No prediction questions about the upcoming race.
+          After qualifying and before the race, a quiz goes live with Yes/No prediction questions about the upcoming race.
           Answer every question before the deadline — the countdown timer shows exactly how much time you have left.
         </p>
       </div>
@@ -60,6 +60,39 @@ const Rules = () => {
           </div>
         ))}
       </div>
+
+      <h2 className="card-title card-title-sm" style={{ margin: "32px 0 16px" }}>
+        Driver Titles
+      </h2>
+
+      <p className="text-secondary text-sm" style={{ lineHeight: "1.7", marginBottom: "12px" }}>
+        Your position in the championship standings earns you an F1-inspired title:
+      </p>
+
+      <div className="flex flex-col gap-3">
+        {[
+          { title: "Strategy Chief", rank: "1st place", className: "rank-title-1" },
+          { title: "Pit Wall Genius", rank: "2nd place", className: "rank-title-2" },
+          { title: "Smooth Operator", rank: "3rd place", className: "rank-title-3" },
+          { title: "Points Finisher", rank: "Top 25%", className: "rank-title-default" },
+          { title: "Backmarker", rank: "Last place", className: "rank-title-default" },
+        ].map((item) => (
+          <div key={item.title} className="tip-row">
+            <span className={`rank-title ${item.className}`} style={{ marginRight: "8px" }}>{item.title}</span>
+            <span className="text-secondary text-sm">{item.rank}</span>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="card-title card-title-sm" style={{ margin: "32px 0 16px" }}>
+        Elite Drivers
+      </h2>
+
+      <p className="text-secondary text-sm" style={{ lineHeight: "1.7", marginBottom: "12px" }}>
+        Some drivers carry a <span style={{ color: "var(--wc-gold)", fontWeight: 700 }}>★</span> star next to their name in the rankings.
+        This marks an <span className="font-bold">Elite Driver</span> — a long-term participant
+        who's been with the league since the early days. It's a badge of honour, not based on score.
+      </p>
 
       <h2 className="card-title card-title-sm" style={{ margin: "32px 0 16px" }}>
         Explore

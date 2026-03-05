@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { collection, onSnapshot, query, orderBy, doc, getDoc } from "firebase/firestore";
+import React, { useState, useEffect, useRef } from "react";
+import { collection, onSnapshot, query, orderBy, doc, getDoc, getDocs } from "firebase/firestore";
 import { db, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import Skeleton from "../ui/Skeleton";
 
 const Rankings = () => {
   const [loading, setLoading] = useState(true);
@@ -17,6 +18,7 @@ const Rankings = () => {
   const [user, setUser] = useState(null);
   const [showRaceColumns, setShowRaceColumns] = useState(false);
   const navigate = useNavigate();
+  const usersLoadedRef = useRef(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -42,14 +44,26 @@ const Rankings = () => {
 
     setLoading(true);
     setError(null);
+    usersLoadedRef.current = false;
 
     const quizzesQuery = query(collection(db, "quizzes"), orderBy("createdAt", "desc"));
     const answersQuery = query(collection(db, "quizAnswers"));
 
     let quizzesData = [];
     let answersDataArr = [];
+    let usersMap = new Map();
+
+    getDocs(collection(db, "users")).then((snapshot) => {
+      snapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        usersMap.set(doc.id, { username: data.username || "Unknown", elite: data.elite === true });
+      });
+      usersLoadedRef.current = true;
+      processData();
+    });
 
     const processData = () => {
+      if (!usersLoadedRef.current) return;
       const userMap = new Map();
       const scoreMap = new Map();
       const submissionMap = new Map();
@@ -58,12 +72,14 @@ const Rankings = () => {
       answersDataArr.forEach((answerData) => {
         const userId = answerData.userId;
         const quizId = answerData.quizId;
-        const username = answerData.username || "Unknown";
+        const userInfo = usersMap.get(userId);
+        const username = userInfo?.username || answerData.username || "Unknown";
+        const elite = userInfo?.elite || false;
         const hasScore = answerData.score !== undefined;
         const score = hasScore ? answerData.score : 0;
 
         if (!userMap.has(userId)) {
-          userMap.set(userId, { id: userId, username });
+          userMap.set(userId, { id: userId, username, elite });
         }
 
         const key = `${userId}_${quizId}`;
@@ -117,8 +133,28 @@ const Rankings = () => {
 
   if (loading) {
     return (
-      <div className="loading">
-        <div className="loading-spinner"></div>
+      <div className="card">
+        <Skeleton width="220px" height="28px" style={{ marginBottom: "24px" }} />
+        <div className="rankings-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th className="rankings-col-rank"><Skeleton width="20px" height="12px" /></th>
+                <th className="rankings-col-driver"><Skeleton width="50px" height="12px" /></th>
+                <th className="rankings-col-total"><Skeleton width="36px" height="12px" /></th>
+              </tr>
+            </thead>
+            <tbody>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <tr key={i}>
+                  <td className="rankings-col-rank"><Skeleton width="20px" height="16px" /></td>
+                  <td className="rankings-col-driver"><Skeleton width={`${80 + i * 15}px`} height="16px" /></td>
+                  <td className="rankings-col-total"><Skeleton width="32px" height="16px" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
@@ -192,7 +228,7 @@ const Rankings = () => {
                       {index + 1}
                     </td>
                     <td className="font-medium rankings-col-driver">
-                      {u.username}
+                      {u.elite && <span style={{ color: "var(--wc-gold)", marginRight: "4px" }}>★</span>}{u.username}
                       {(() => {
                         const title = getRankTitle(index + 1, users.length);
                         return title ? (

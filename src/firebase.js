@@ -9,7 +9,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -88,8 +88,14 @@ export const getAllUsers = async () => {
 // Update user role
 export const updateUserRole = async (userId, newRole) => {
   const userRef = doc(db, "users", userId);
-  await setDoc(userRef, { role: newRole }, { merge: true });
+  await updateDoc(userRef, { role: newRole });
   return true;
+};
+
+// Update user elite flag
+export const updateUserElite = async (userId, isElite) => {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, { elite: isElite });
 };
 
 export const logout = () => {

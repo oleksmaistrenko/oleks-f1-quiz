@@ -8,34 +8,34 @@
 /* ── Tokens ────────────────────────────────── */
 :root {
     /* Palette */
-    --wc-red: #E42B31;
-    --wc-red-hover: #CC2328;
-    --wc-red-dim: rgba(228, 43, 49, 0.12);
-    --wc-gold: #F0A500;
-    --wc-gold-hover: #D99400;
-    --wc-gold-dim: rgba(240, 165, 0, 0.12);
+    --wc-red: #E83838;
+    --wc-red-hover: #B82020;
+    --wc-red-dim: rgba(232, 56, 56, 0.12);
+    --wc-gold: #A0AAB8;
+    --wc-gold-hover: #B8C0CC;
+    --wc-gold-dim: rgba(160, 170, 184, 0.10);
 
     /* Surfaces */
-    --wc-bg: #0A0A12;
-    --wc-surface: #14142A;
-    --wc-surface-hover: #1C1C36;
-    --wc-carbon: #101020;
+    --wc-bg: #0C0C12;
+    --wc-surface: #181820;
+    --wc-surface-hover: #22222C;
+    --wc-carbon: #121218;
 
     /* Text */
     --wc-text: #EDEDF0;
-    --wc-text-secondary: #7E7E98;
-    --wc-text-muted: #4E4E66;
+    --wc-text-secondary: #9090A8;
+    --wc-text-muted: #7A7A94;
 
     /* Borders */
-    --wc-border: #222240;
-    --wc-border-hover: #333358;
+    --wc-border: #28282F;
+    --wc-border-hover: #38383F;
 
     /* Status */
     --wc-success: #2DD55B;
     --wc-success-dim: rgba(45, 213, 91, 0.12);
     --wc-error: #EF4444;
     --wc-error-dim: rgba(239, 68, 68, 0.12);
-    --wc-warning: #F0A500;
+    --wc-warning: #F59E0B;
 
     /* Spacing */
     --space-xs: 4px;
@@ -55,16 +55,16 @@
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
 
-    /* Font Scale */
+    /* Font Scale — minimum 2px visible gap per step */
     --fs-micro: 0.625rem;   /* 10px — badges, micro labels */
     --fs-xs: 0.75rem;       /* 12px — footer, btn-small, distribution */
-    --fs-sm: 0.8125rem;     /* 13px — nav links, timer, race columns */
-    --fs-body: 0.875rem;    /* 14px — buttons, forms, alerts, body text */
-    --fs-md: 1rem;          /* 16px — question text, player names */
-    --fs-lg: 1.125rem;      /* 18px — quiz titles, h2h-vs, feedback */
-    --fs-xl: 1.25rem;       /* 20px — card titles */
-    --fs-2xl: 1.375rem;     /* 22px — header title, overlay text */
-    --fs-3xl: 1.75rem;      /* 28px — countdown */
+    --fs-sm: 0.875rem;      /* 14px — nav links, timer, race columns */
+    --fs-body: 1rem;        /* 16px — buttons, forms, alerts, body text */
+    --fs-md: 1.125rem;      /* 18px — question text, player names */
+    --fs-lg: 1.25rem;       /* 20px — quiz titles, h2h-vs, feedback */
+    --fs-xl: 1.5rem;        /* 24px — card titles */
+    --fs-2xl: 1.75rem;      /* 28px — header title, overlay text */
+    --fs-3xl: 2.25rem;      /* 36px — countdown */
     --fs-4xl: 2rem;         /* 32px — h2h stats */
     --fs-5xl: 2.25rem;      /* 36px — stat values */
     --fs-hero: 3rem;        /* 48px — big score display */
@@ -89,6 +89,7 @@ html {
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 body {
@@ -101,8 +102,8 @@ body {
     min-height: 100vh;
     /* Ambient glow — subtle red/gold depth */
     background-image:
-        radial-gradient(ellipse at 15% 50%, rgba(228, 43, 49, 0.04) 0%, transparent 60%),
-        radial-gradient(ellipse at 85% 20%, rgba(240, 165, 0, 0.025) 0%, transparent 50%);
+        radial-gradient(ellipse at 15% 50%, rgba(232, 56, 56, 0.04) 0%, transparent 60%),
+        radial-gradient(ellipse at 85% 20%, rgba(160, 170, 184, 0.02) 0%, transparent 50%);
     background-attachment: fixed;
 }
 
