@@ -196,8 +196,10 @@ const Rankings = () => {
     return hasSubmitted ? "\u2705" : "\u2014";
   };
 
-  const truncateTitle = (title, max) =>
-    title.length > max ? title.slice(0, max) + "…" : title;
+  const truncateTitle = (title, max) => {
+    const chars = [...title];
+    return chars.length > max ? chars.slice(0, max).join("") + "…" : title;
+  };
 
   return (
     <div className="card">
