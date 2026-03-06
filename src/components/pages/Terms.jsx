@@ -32,7 +32,7 @@ const Terms = () => {
           Accounts
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
-          You may create one account per person. You are responsible for keeping your login credentials secure and for all activity under your account. We reserve the right to remove accounts that violate these terms.
+          You may create one account per person. You are responsible for keeping your login credentials secure and for all activity under your account. Your email address will only be used for authentication and responding to feedback — never for marketing, newsletters, or promotional communications. We reserve the right to remove accounts that violate these terms.
         </p>
       </div>
 

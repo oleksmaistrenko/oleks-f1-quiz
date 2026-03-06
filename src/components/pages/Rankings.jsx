@@ -245,7 +245,7 @@ const Rankings = () => {
                       <td
                         key={`${u.id}_${quiz.id}`}
                         className="rankings-col-race"
-                        style={{ textAlign: "center", fontFamily: "'JetBrains Mono', monospace" }}
+                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
                       >
                         {getScore(u.id, quiz.id)}
                       </td>

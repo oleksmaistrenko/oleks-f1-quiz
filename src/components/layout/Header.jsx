@@ -131,10 +131,10 @@ const Header = () => {
 
         <div className={`header-nav ${menuOpen ? 'header-nav-open' : ''}`}>
           <nav className="nav-menu">
-            <Link to="/" className={navLinkClass('/')}>Play</Link>
-            <Link to="/dashboard" className={navLinkClass('/dashboard')}>Pit Wall</Link>
-            <Link to="/rankings" className={navLinkClass('/rankings')}>Rankings</Link>
-            <Link to="/head-to-head" className={navLinkClass('/head-to-head')}>H2H</Link>
+            {user && <Link to="/" className={navLinkClass('/')}>Play</Link>}
+            {user && <Link to="/dashboard" className={navLinkClass('/dashboard')}>Pit Wall</Link>}
+            {user && <Link to="/rankings" className={navLinkClass('/rankings')}>Rankings</Link>}
+            {user && <Link to="/head-to-head" className={navLinkClass('/head-to-head')}>H2H</Link>}
             <Link to="/rules" className={navLinkClass('/rules')}>Briefing</Link>
             {isAdmin && (
               <>

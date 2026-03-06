@@ -209,7 +209,7 @@ const HeadToHead = () => {
               .filter((u) => u.id !== player1Id)
               .map((u) => (
                 <option key={u.id} value={u.id}>
-                  {u.username}
+                  {u.username}{u.id === user?.uid ? " (you)" : ""}
                 </option>
               ))}
           </select>

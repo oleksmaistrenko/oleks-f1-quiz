@@ -1,10 +1,12 @@
 import React, { useRef, useCallback, useState, useEffect } from "react";
+import { getNextRace, getDaysUntil } from "../../data/f1-calendar-2026";
 
 const CARD_WIDTH = 600;
-const CARD_HEIGHT = 314;
+const CARD_HEIGHT = 340;
 const DPR = 2;
 
 const ShareCard = ({ quizTitle, score, totalQuestions, answers, correctAnswers, username, rank }) => {
+  const nextRace = getNextRace();
   const canvasRef = useRef(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -120,24 +122,41 @@ const ShareCard = ({ quizTitle, score, totalQuestions, answers, correctAnswers, 
     });
 
     // ── BOTTOM BAR ──
-    const barY = CARD_HEIGHT - 42;
+    const barH = nextRace ? 66 : 42;
+    const barY = CARD_HEIGHT - barH;
     ctx.fillStyle = "#1A1A24";
-    ctx.fillRect(0, barY, CARD_WIDTH, 42);
+    ctx.fillRect(0, barY, CARD_WIDTH, barH);
     ctx.fillStyle = "#28282F";
     ctx.fillRect(0, barY, CARD_WIDTH, 1);
 
+    // Tagline + URL row
     ctx.fillStyle = "#7A7A94";
     ctx.font = "italic 400 12px 'Outfit', 'Inter', sans-serif";
-    ctx.fillText("Think you can beat this?", 28, barY + 26);
+    ctx.fillText("The F1 quiz where nobody knows the answer", 28, barY + 22);
 
     ctx.fillStyle = "#E83838";
     ctx.font = "700 12px 'Outfit', 'Inter', sans-serif";
     const urlText = "we-check.ing";
     const urlWidth = ctx.measureText(urlText).width;
-    ctx.fillText(urlText, CARD_WIDTH - 28 - urlWidth, barY + 26);
+    ctx.fillText(urlText, CARD_WIDTH - 28 - urlWidth, barY + 22);
+
+    // Next GP row
+    if (nextRace) {
+      const days = getDaysUntil(nextRace.date);
+      const gpText = `Next up: ${nextRace.name} · ${days} day${days === 1 ? "" : "s"} away`;
+      ctx.fillStyle = "#9090A8";
+      ctx.font = "500 11px 'Outfit', 'Inter', sans-serif";
+      ctx.fillText(gpText, 28, barY + 48);
+
+      ctx.fillStyle = "#EDEDF0";
+      ctx.font = "600 11px 'Outfit', 'Inter', sans-serif";
+      const ctaText = "Think you can beat this? →";
+      const ctaWidth = ctx.measureText(ctaText).width;
+      ctx.fillText(ctaText, CARD_WIDTH - 28 - ctaWidth, barY + 48);
+    }
 
     return canvas;
-  }, [quizTitle, score, totalQuestions, answers, correctAnswers, username, rank]);
+  }, [quizTitle, score, totalQuestions, answers, correctAnswers, username, rank, nextRace]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -147,10 +166,27 @@ const ShareCard = ({ quizTitle, score, totalQuestions, answers, correctAnswers, 
 
   const handleDownload = () => {
     const canvas = generateImage();
-    const link = document.createElement("a");
-    link.download = `we-check-ing-${quizTitle.replace(/\s+/g, "-").toLowerCase()}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+    const dataUrl = canvas.toDataURL("image/png");
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+    if (isIOS) {
+      // iOS Safari blocks async window.open — use synchronous data URL
+      const win = window.open();
+      if (win) {
+        win.document.write(
+          `<html><head><title>Save Image</title><meta name="viewport" content="width=device-width"></head>` +
+          `<body style="margin:0;display:flex;justify-content:center;background:#000">` +
+          `<img src="${dataUrl}" style="max-width:100%;height:auto" />` +
+          `</body></html>`
+        );
+        win.document.close();
+      }
+    } else {
+      const link = document.createElement("a");
+      link.download = `we-check-ing-${quizTitle.replace(/\s+/g, "-").toLowerCase()}.png`;
+      link.href = dataUrl;
+      link.click();
+    }
   };
 
   const handleShare = async () => {
@@ -197,7 +233,7 @@ const ShareCard = ({ quizTitle, score, totalQuestions, answers, correctAnswers, 
         />
       )}
       <div className="share-card-actions">
-        <button className="btn btn-secondary" onClick={handleDownload}>
+        <button className="btn btn-secondary share-card-desktop-only" onClick={handleDownload}>
           Save Image
         </button>
         <button className="btn" onClick={handleShare}>

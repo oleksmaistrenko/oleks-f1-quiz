@@ -17,7 +17,7 @@ const Privacy = () => {
           When you use we-check.ing, we collect the following information:
         </p>
         <ul className="text-secondary" style={{ lineHeight: "1.7", paddingLeft: "20px", marginTop: "8px" }}>
-          <li><strong>Email address</strong> — used for account creation and login</li>
+          <li><strong>Email address</strong> — used solely for account creation, login, and responding to your feedback. We will never use your email for marketing, newsletters, or promotional purposes</li>
           <li><strong>Username</strong> — chosen by you, displayed in rankings and quizzes</li>
           <li><strong>Quiz answers and scores</strong> — your predictions and calculated results</li>
           <li><strong>Usage data</strong> — collected via Firebase Analytics (page views, feature usage, device type)</li>
@@ -29,7 +29,7 @@ const Privacy = () => {
           How We Use It
         </div>
         <p className="text-secondary" style={{ lineHeight: "1.7" }}>
-          Your data is used to operate the quiz game: managing your account, recording your predictions, calculating scores, displaying leaderboards, and improving the service through analytics.
+          Your data is used to operate the quiz game: managing your account, recording your predictions, calculating scores, displaying leaderboards, and improving the service through analytics. Your email address is never used for marketing or promotional communications — only for authentication and responding to feedback you submit.
         </p>
       </div>
 

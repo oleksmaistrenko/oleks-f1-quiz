@@ -216,7 +216,7 @@ const Dashboard = () => {
                 >
                   <div className="history-item-left">
                     <span className={`history-expand-arrow${isExpanded ? " history-expand-arrow-open" : ""}`}>
-                      ▶
+                      ▼
                     </span>
                     <div>
                       <div className="font-medium">{q.quizTitle}</div>
