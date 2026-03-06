@@ -384,7 +384,7 @@ const QuizGame = () => {
             </div>
           </div>
         )}
-        <button onClick={() => navigate("/")} className="btn" style={{ marginTop: "16px" }}>
+        <button onClick={() => navigate("/dashboard")} className="btn" style={{ marginTop: "16px" }}>
           Back to Pit Wall
         </button>
       </div>
