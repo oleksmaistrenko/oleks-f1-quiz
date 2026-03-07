@@ -1472,10 +1472,52 @@ tbody tr:hover .rankings-col-driver {
 
 .question-builder {
     margin-bottom: 32px;
-    padding: 20px;
+    padding: var(--space-lg);
     background-color: var(--wc-carbon);
     border-radius: var(--radius-md);
     border-left: 3px solid var(--wc-gold);
+}
+
+.question-builder textarea.form-input {
+    min-height: 200px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.question-builder .question-container {
+    margin-bottom: var(--space-lg);
+}
+
+@media (max-width: 767px) {
+    .question-builder {
+        padding: var(--space-md);
+        margin-left: -20px;
+        margin-right: -20px;
+        border-radius: 0;
+        border-left: none;
+        border-top: 3px solid var(--wc-gold);
+    }
+
+    .question-builder .question-container {
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .question-builder textarea.form-input {
+        min-height: 280px;
+    }
+
+    .question-builder .flex.space-x-4 {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .question-builder .flex.space-x-4 > * + * {
+        margin-left: 0;
+    }
+
+    .question-builder .btn {
+        width: 100%;
+    }
 }
 
 .option-builder {

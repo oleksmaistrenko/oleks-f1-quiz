@@ -362,11 +362,9 @@ const QuizAdmin = () => {
   const handleStartEditQuiz = (quiz) => {
     // Format the date for the datetime-local input
     let formattedEndTime;
-    if (quiz.endTime instanceof Date) {
-      formattedEndTime = quiz.endTime.toISOString().slice(0, 16);
-    } else {
-      formattedEndTime = new Date(quiz.endTime).toISOString().slice(0, 16);
-    }
+    const date = quiz.endTime instanceof Date ? quiz.endTime : new Date(quiz.endTime);
+    const offset = date.getTimezoneOffset();
+    formattedEndTime = new Date(date.getTime() - offset * 60 * 1000).toISOString().slice(0, 16);
 
     // Create a copy of the quiz for editing
     setEditQuiz({
