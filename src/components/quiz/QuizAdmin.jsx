@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { collection, addDoc, getDocs, getDoc, doc, updateDoc, Timestamp, query, where } from "firebase/firestore";
-import { db, auth, logout, getUserProfile } from "../firebase";
+import { db, auth, logout, getUserProfile } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -83,6 +83,7 @@ const QuizAdmin = () => {
             hasAnswers: hasAnswers
           };
         });
+        quizList.sort((a, b) => b.endTime - a.endTime);
         setQuizzes(quizList);
       } catch (error) {
         console.error("Error loading quizzes:", error);
@@ -203,72 +204,15 @@ const QuizAdmin = () => {
   // Handle setting correct answers for a quiz
   const handleSetAnswers = async (quizId, updatedQuestions) => {
     try {
-      // Update quiz with correct answers
       const quizRef = doc(db, "quizzes", quizId);
       await updateDoc(quizRef, { questions: updatedQuestions });
-      
-      // Calculate scores for all user submissions for this quiz
-      const answersQuery = query(
-        collection(db, "quizAnswers"),
-        where("quizId", "==", quizId)
-      );
-      const answersSnapshot = await getDocs(answersQuery);
-      
-      // Process each user's answers and calculate their score
-      const batchUpdates = [];
-      console.log(`Found ${answersSnapshot.size} user answer submissions for this quiz`);
-      
-      answersSnapshot.forEach(answerDoc => {
-        const userData = answerDoc.data();
-        const userAnswers = userData.answers || {};
-        let score = 0;
-        
-        console.log("User answers:", JSON.stringify(userAnswers));
-        console.log("Questions with correct answers:", JSON.stringify(updatedQuestions));
-        
-        // Calculate score: +1 for each correct answer
-        updatedQuestions.forEach((question, index) => {
-          const questionId = `q${index + 1}`;
-          console.log(`Checking question ${questionId}: User answered: ${userAnswers[questionId]}, Correct answer: ${question.correctAnswer}`);
-          
-          if (
-            userAnswers[questionId] && 
-            question.correctAnswer && 
-            userAnswers[questionId] === question.correctAnswer
-          ) {
-            score += 1;
-            console.log(`Correct answer! +1 point. Current score: ${score}`);
-          }
-        });
-        
-        // Update the user's answer document with the score
-        const answerRef = doc(db, "quizAnswers", answerDoc.id);
-        console.log(`Updating document ${answerDoc.id} with final score: ${score}/${updatedQuestions.length}`);
-        
-        batchUpdates.push(updateDoc(answerRef, { 
-          score: score,
-          totalQuestions: updatedQuestions.length
-        }));
-      });
-      
-      // Execute all updates
-      console.log(`Executing ${batchUpdates.length} score updates...`);
-      if (batchUpdates.length > 0) {
-        await Promise.all(batchUpdates);
-        console.log('All score updates completed successfully!');
-      } else {
-        console.log('No score updates to process.');
-      }
-      
+
       // Refresh quiz list
       const querySnapshot = await getDocs(collection(db, "quizzes"));
       const updatedQuizzes = querySnapshot.docs.map((doc) => {
         const data = doc.data();
-        
-        // Check if quiz has any answers set
-        const hasAnswers = data.questions && 
+        const hasAnswers = data.questions &&
           data.questions.some(q => q.correctAnswer !== null && q.correctAnswer !== undefined && q.correctAnswer !== "");
-          
         return {
           id: doc.id,
           ...data,
@@ -277,12 +221,12 @@ const QuizAdmin = () => {
           hasAnswers: hasAnswers
         };
       });
-      
+
       setQuizzes(updatedQuizzes);
       setShowAnswersForm(false);
       setSelectedQuiz(null);
-      
-      alert("Answers set and scores calculated successfully!");
+
+      alert("Answers saved! Scores will be calculated automatically.");
     } catch (error) {
       console.error("Error updating quiz answers:", error);
       alert("Failed to update answers. Please try again.");
@@ -473,12 +417,6 @@ const QuizAdmin = () => {
           >
             {showCreateForm ? "Cancel" : "Create New Quiz"}
           </button>
-          <button
-            onClick={handleLogout}
-            className="btn"
-          >
-            Logout
-          </button>
         </div>
       </div>
 
@@ -517,29 +455,15 @@ const QuizAdmin = () => {
                 <h4 className="font-medium mb-2">Question {qIndex + 1}</h4>
 
                 <div className="mb-3">
-                  <input
-                    type="text"
+                  <textarea
                     value={question.text}
                     onChange={(e) =>
                       handleQuestionChange(qIndex, "text", e.target.value)
                     }
                     className="form-input"
                     placeholder="Enter question text"
+                    rows={3}
                   />
-                </div>
-
-                <div className="mb-3">
-                  <p className="form-label">Options (Yes/No)</p>
-                  <div className="flex space-x-4 py-2">
-                    {question.options.map((option, oIndex) => (
-                      <div key={oIndex} className="flex-1 text-center p-2 border rounded bg-gray-50">
-                        {option}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Correct answers will be set after the quiz closes
-                  </p>
                 </div>
               </div>
             ))}
@@ -587,35 +511,15 @@ const QuizAdmin = () => {
                 <h4 className="font-medium mb-2">Question {qIndex + 1}</h4>
 
                 <div className="mb-3">
-                  <input
-                    type="text"
+                  <textarea
                     value={question.text}
                     onChange={(e) =>
                       handleEditQuestionChange(qIndex, "text", e.target.value)
                     }
                     className="form-input"
                     placeholder="Enter question text"
+                    rows={3}
                   />
-                </div>
-
-                <div className="mb-3">
-                  <p className="form-label">Options (Yes/No)</p>
-                  <div className="flex space-x-4 py-2">
-                    {question.options.map((option, oIndex) => (
-                      <div key={oIndex} className="flex-1 text-center p-2 border rounded bg-gray-50">
-                        {option}
-                      </div>
-                    ))}
-                  </div>
-                  {question.correctAnswer ? (
-                    <p className="text-xs text-green-600 mt-1">
-                      Correct answer currently set to: {question.correctAnswer}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Correct answers will be set after the quiz closes
-                    </p>
-                  )}
                 </div>
               </div>
             ))}
@@ -652,7 +556,7 @@ const QuizAdmin = () => {
                     {question.options.map((option, oIndex) => (
                       <div key={oIndex} className="flex-1">
                         <label className={`option-label ${
-                          question.correctAnswer === option ? 'border-l-4 border-l-[var(--f1-red)]' : ''
+                          question.correctAnswer === option ? 'border-l-4 border-l-[var(--wc-red)]' : ''
                         }`}>
                           <input
                             type="radio"
@@ -708,12 +612,12 @@ const QuizAdmin = () => {
                 <div key={quiz.id} className="quiz-item">
                   <h3 className="quiz-title">{quiz.title}</h3>
                   <div className="quiz-meta">
-                    <span>Ends: {new Date(quiz.endTime).toLocaleString()}</span>
+                    <span>Ends: {new Date(quiz.endTime).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
                     <span>Questions: {quiz.questionCount}</span>
                   </div>
                   <p className="text-sm mb-3">
                     {quiz.hasAnswers ? 
-                      <span style={{ color: "var(--f1-red)" }}>Answers set ✓</span> : 
+                      <span style={{ color: "var(--wc-red)" }}>Answers set ✓</span> : 
                       <span className="text-orange-500">Answers not set</span>}
                   </p>
                   <div className="admin-controls">
@@ -722,19 +626,13 @@ const QuizAdmin = () => {
                       className="btn btn-small btn-secondary">
                       Edit
                     </button>
-                    <button className="btn btn-small btn-secondary">
-                      View Results
-                    </button>
-                    <button 
+                    <button
                       onClick={() => {
                         setSelectedQuiz(quiz);
                         setShowAnswersForm(true);
                       }}
                       className="btn btn-small btn-accent">
                       Set Answers
-                    </button>
-                    <button className="btn btn-small btn-secondary">
-                      Share
                     </button>
                   </div>
                 </div>

@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "oleks-f1-quizz"
-  }
+    "default": "oleks-f1-quizz",
+    "prod": "we-checking"
+  },
+  "targets": {},
+  "etags": {}
 }

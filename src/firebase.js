@@ -1,5 +1,6 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import {
   getAuth,
@@ -8,21 +9,27 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, collection, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, serverTimestamp } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;
+
+export const trackEvent = (eventName, params = {}) => {
+  if (analytics) logEvent(analytics, eventName, params);
+};
 
 // Authentication helper functions
 export const loginWithEmail = (email, password) => {
@@ -48,6 +55,7 @@ export const registerWithEmail = async (email, password, username) => {
     email: email,
     username: username,
     createdAt: new Date(),
+    termsAcceptedAt: serverTimestamp(),
     role: isFirstUser ? "admin" : "user" // First user gets admin role
   });
 
@@ -80,12 +88,18 @@ export const getAllUsers = async () => {
 // Update user role
 export const updateUserRole = async (userId, newRole) => {
   const userRef = doc(db, "users", userId);
-  await setDoc(userRef, { role: newRole }, { merge: true });
+  await updateDoc(userRef, { role: newRole });
   return true;
+};
+
+// Update user elite flag
+export const updateUserElite = async (userId, isElite) => {
+  const userRef = doc(db, "users", userId);
+  await updateDoc(userRef, { elite: isElite });
 };
 
 export const logout = () => {
   return signOut(auth);
 };
 
-export { db, auth };
+export { db, auth, analytics };
