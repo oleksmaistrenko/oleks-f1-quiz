@@ -12,6 +12,7 @@ import {
   updateDoc,
   where,
   Timestamp,
+  onSnapshot,
 } from "firebase/firestore";
 import { db, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -41,6 +42,7 @@ const QuizGame = () => {
   const [distribution, setDistribution] = useState({});
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
   const [reminderSet, setReminderSet] = useState(false);
+  const [raceDirectorMsg, setRaceDirectorMsg] = useState(null);
   const addToast = useToast();
   const nextRace = getNextRace();
   // Handle answer selection
@@ -83,6 +85,19 @@ const QuizGame = () => {
 
     return () => unsubscribe();
   }, [navigate]);
+
+  // Real-time race director message
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, "settings", "raceDirectorMessage"), (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        setRaceDirectorMsg(data.active && data.text ? data.text : null);
+      } else {
+        setRaceDirectorMsg(null);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   // Fetch quiz data
   useEffect(() => {
@@ -360,6 +375,15 @@ const QuizGame = () => {
         <div className="transmission-bar">
           <div className="transmission-bar-closed" />
         </div>
+        {raceDirectorMsg && (
+          <div className="race-director-banner" style={{ textAlign: "left" }}>
+            <div className="race-director-flag" />
+            <div className="race-director-content">
+              <div className="race-director-title">Message from the Race Director</div>
+              <div className="race-director-text">{raceDirectorMsg}</div>
+            </div>
+          </div>
+        )}
         <div style={{ fontSize: "var(--fs-hero)", marginBottom: "16px", opacity: 0.6 }}>
           &#x1F3CE;
         </div>
@@ -396,6 +420,17 @@ const QuizGame = () => {
       <div className="transmission-bar">
         <div className={quizClosed ? "transmission-bar-closed" : "transmission-bar-live"} />
       </div>
+
+      {raceDirectorMsg && (
+        <div className="race-director-banner">
+          <div className="race-director-flag" />
+          <div className="race-director-content">
+            <div className="race-director-title">Message from the Race Director</div>
+            <div className="race-director-text">{raceDirectorMsg}</div>
+          </div>
+        </div>
+      )}
+
       {nextRace && (
         <div className="next-race-banner">
           <div className="next-race-info">

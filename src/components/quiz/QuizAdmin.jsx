@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { collection, addDoc, getDocs, getDoc, doc, updateDoc, Timestamp, query, where } from "firebase/firestore";
+import { collection, addDoc, getDocs, getDoc, doc, updateDoc, setDoc, Timestamp, query, where, serverTimestamp } from "firebase/firestore";
 import { db, auth, logout, getUserProfile } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
@@ -25,6 +25,9 @@ const QuizAdmin = () => {
     ],
   });
   const [editQuiz, setEditQuiz] = useState(null);
+  const [raceDirectorMsg, setRaceDirectorMsg] = useState("");
+  const [raceDirectorActive, setRaceDirectorActive] = useState(false);
+  const [raceDirectorSaving, setRaceDirectorSaving] = useState(false);
 
   useEffect(() => {
     // Check authentication status
@@ -93,6 +96,40 @@ const QuizAdmin = () => {
     
     fetchQuizzes();
   }, [user]);
+
+  // Load race director message
+  useEffect(() => {
+    const fetchRaceDirectorMsg = async () => {
+      if (!user) return;
+      try {
+        const msgDoc = await getDoc(doc(db, "settings", "raceDirectorMessage"));
+        if (msgDoc.exists()) {
+          const data = msgDoc.data();
+          setRaceDirectorMsg(data.text || "");
+          setRaceDirectorActive(data.active || false);
+        }
+      } catch (error) {
+        console.error("Error loading race director message:", error);
+      }
+    };
+    fetchRaceDirectorMsg();
+  }, [user]);
+
+  const handleSaveRaceDirectorMsg = async () => {
+    setRaceDirectorSaving(true);
+    try {
+      await setDoc(doc(db, "settings", "raceDirectorMessage"), {
+        text: raceDirectorMsg,
+        active: raceDirectorActive,
+        updatedAt: serverTimestamp(),
+      });
+      alert("Race Director message updated!");
+    } catch (error) {
+      console.error("Error saving race director message:", error);
+      alert("Failed to save message. Please try again.");
+    }
+    setRaceDirectorSaving(false);
+  };
 
   const handleQuizTitleChange = (e) => {
     setNewQuiz({
@@ -414,6 +451,42 @@ const QuizAdmin = () => {
             className="btn btn-secondary"
           >
             {showCreateForm ? "Cancel" : "Create New Quiz"}
+          </button>
+        </div>
+      </div>
+
+      {/* Race Director Message */}
+      <div className="race-director-admin">
+        <div className="race-director-admin-header">
+          <div className="race-director-admin-label">Message from the Race Director</div>
+          <label className="race-director-toggle">
+            <input
+              type="checkbox"
+              checked={raceDirectorActive}
+              onChange={(e) => setRaceDirectorActive(e.target.checked)}
+            />
+            <span className="race-director-toggle-track">
+              <span className="race-director-toggle-thumb" />
+            </span>
+            <span className={`race-director-toggle-label ${raceDirectorActive ? 'text-success' : 'text-secondary'}`}>
+              {raceDirectorActive ? "LIVE" : "OFF"}
+            </span>
+          </label>
+        </div>
+        <div className="race-director-admin-body">
+          <textarea
+            value={raceDirectorMsg}
+            onChange={(e) => setRaceDirectorMsg(e.target.value)}
+            className="form-input race-director-input"
+            placeholder="Enter a message visible to all players..."
+            rows={2}
+          />
+          <button
+            onClick={handleSaveRaceDirectorMsg}
+            disabled={raceDirectorSaving}
+            className="btn btn-small btn-accent"
+          >
+            {raceDirectorSaving ? "Saving..." : "Save"}
           </button>
         </div>
       </div>
