@@ -85,6 +85,31 @@ const Rules = () => {
       </div>
 
       <h2 className="card-title card-title-sm" style={{ margin: "32px 0 16px" }}>
+        Tiebreaker Rules
+      </h2>
+
+      <p className="text-secondary text-sm" style={{ lineHeight: "1.7", marginBottom: "12px" }}>
+        When two or more drivers have the same total points, the standings are decided by:
+      </p>
+
+      <div className="flex flex-col gap-3">
+        {[
+          { title: "1. Earlier advantage", desc: "The driver who was higher in the standings before the scores became equal gets priority." },
+          { title: "2. Alphabetical order", desc: "If drivers have been tied throughout, names are sorted alphabetically." },
+        ].map((tip) => (
+          <div key={tip.title} className="tip-row">
+            <span className="text-gold font-bold">{tip.title}</span>
+            <span className="text-secondary text-sm">{tip.desc}</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-secondary text-sm" style={{ lineHeight: "1.7", marginTop: "12px" }}>
+        The <span className="font-bold">Points Finisher</span> title is awarded to the top 25% of drivers.
+        If multiple drivers are tied at the cutoff, all of them receive the title.
+      </p>
+
+      <h2 className="card-title card-title-sm" style={{ margin: "32px 0 16px" }}>
         Elite Drivers
       </h2>
 

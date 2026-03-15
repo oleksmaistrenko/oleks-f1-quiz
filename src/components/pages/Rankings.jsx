@@ -83,7 +83,8 @@ const Rankings = () => {
         }
 
         const key = `${userId}_${quizId}`;
-        submissionMap.set(key, true);
+        const hasAnswers = answerData.answers && Object.keys(answerData.answers).length > 0;
+        submissionMap.set(key, hasAnswers);
 
         if (hasScore) {
           scoreMap.set(key, score);
@@ -92,10 +93,31 @@ const Rankings = () => {
         }
       });
 
+      // Sort quizzes oldest-first for cumulative tiebreaker
+      const sortedQuizIds = [...quizzesData]
+        .sort((a, b) => (a.createdAt?.toMillis?.() || 0) - (b.createdAt?.toMillis?.() || 0))
+        .map(q => q.id);
+
       const users = Array.from(userMap.values()).sort((a, b) => {
         const totalA = totalScoreMap.get(a.id) || 0;
         const totalB = totalScoreMap.get(b.id) || 0;
-        return totalB - totalA;
+
+        // Primary: total score descending
+        if (totalB !== totalA) return totalB - totalA;
+
+        // Tiebreaker: who reached their score first (cumulative round-by-round)
+        let cumA = 0;
+        let cumB = 0;
+        for (const quizId of sortedQuizIds) {
+          const scoreA = scoreMap.get(`${a.id}_${quizId}`) || 0;
+          const scoreB = scoreMap.get(`${b.id}_${quizId}`) || 0;
+          cumA += scoreA;
+          cumB += scoreB;
+          if (cumA !== cumB) return cumB - cumA;
+        }
+
+        // Final fallback: alphabetical by username
+        return a.username.localeCompare(b.username, undefined, { sensitivity: 'base' });
       });
 
       const scores = {};
@@ -165,7 +187,15 @@ const Rankings = () => {
 
   const { users, quizzes, scores, submissions, totalScores } = rankingsData;
 
-  const getRankTitle = (rank, totalUsers) => {
+  const getPointsFinisherCutoffScore = () => {
+    if (users.length === 0) return -1;
+    const cutoffRank = Math.ceil(users.length * 0.25);
+    return totalScores[users[cutoffRank - 1]?.id] || 0;
+  };
+
+  const pointsFinisherCutoffScore = getPointsFinisherCutoffScore();
+
+  const getRankTitle = (rank, totalUsers, userId) => {
     const titles = {
       1: { label: "Strategy Chief", className: "rank-title-1" },
       2: { label: "Pit Wall Genius", className: "rank-title-2" },
@@ -178,7 +208,8 @@ const Rankings = () => {
       return { label: "Backmarker", className: "rank-title-default" };
     }
 
-    if (rank <= Math.ceil(totalUsers * 0.25)) {
+    const userScore = totalScores[userId] || 0;
+    if (userScore >= pointsFinisherCutoffScore && pointsFinisherCutoffScore > 0) {
       return { label: "Points Finisher", className: "rank-title-default" };
     }
 
@@ -232,7 +263,7 @@ const Rankings = () => {
                     <td className="font-medium rankings-col-driver">
                       {u.elite && <span style={{ color: "var(--wc-gold)", marginRight: "4px" }}>★</span>}{u.username}
                       {(() => {
-                        const title = getRankTitle(index + 1, users.length);
+                        const title = getRankTitle(index + 1, users.length, u.id);
                         return title ? (
                           <span className={`rank-title ${title.className}`}>{title.label}</span>
                         ) : null;

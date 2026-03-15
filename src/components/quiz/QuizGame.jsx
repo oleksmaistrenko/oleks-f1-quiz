@@ -208,7 +208,7 @@ const QuizGame = () => {
         clearInterval(timer);
         setTimeRemaining("Chequered flag");
 
-        if (!submittedRef.current) {
+        if (!submittedRef.current && Object.keys(answers).length > 0) {
           handleSubmit();
         }
       } else {
